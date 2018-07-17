@@ -1,0 +1,9 @@
+{
+	"name": "anendektos",
+	"authors": [
+		"Steven Oliver"
+	],
+	"description": "ἀνένδεκτος - A bro log parser and statisical analyser",
+	"copyright": "Copyright © 2018, Steven Oliver",
+	"license": "Apache-2.0"
+}
