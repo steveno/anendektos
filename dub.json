@@ -3,7 +3,20 @@
 	"authors": [
 		"Steven Oliver"
 	],
-	"description": "ἀνένδεκτος - A bro log parser and statisical analyser",
+	"description": "ἀνένδεκτος - A bro log parser and summarizer",
 	"copyright": "Copyright © 2018, Steven Oliver",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+        "configurations": [
+        { "name": "executable" },
+        {
+            "name": "unittest",
+            "targetType": "executable",
+            "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
+            "mainSourceFile": "bin/ut.d",
+            "excludedSourceFiles": ["source/app.d"],
+            "dependencies": {
+                "unit-threaded": "*"
+            }
+        }
+    ]
 }
