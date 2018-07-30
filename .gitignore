@@ -8,6 +8,7 @@ anendektos.dll
 anendektos.a
 anendektos.lib
 anendektos-test-*
+libanendektos.a
 *.exe
 *.o
 *.obj
