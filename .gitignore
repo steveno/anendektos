@@ -13,3 +13,6 @@ libanendektos.a
 *.o
 *.obj
 *.lst
+
+# unit-threaded
+ut.d
