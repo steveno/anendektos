@@ -14,7 +14,6 @@
             "targetType": "executable",
             "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
             "mainSourceFile": "bin/ut.d",
-            "excludedSourceFiles": ["source/app.d"],
             "dependencies": {
                 "unit-threaded": "*"
             }

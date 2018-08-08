@@ -1,0 +1,13 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	dns
+#open	2018-07-15-16-39-35
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	proto	trans_id	rtt	query	qclass	qclass_name	qtype	qtype_name	rcode	rcode_name	AA	TC	RD	RA	Z	answers	TTLs	rejected
+#types	time	string	addr	port	addr	port	enum	count	interval	string	count	string	count	string	count	string	bool	bool	bool	bool	count	vector[string]	vector[interval]	bool
+1531687175.438281	COac2a2ZLGZJSbS2r5	10.0.0.2	33136	192.168.5.20	53	udp	6396	0.016022	fakewebsite.net	1	C_INTERNET	1	A	0	NOERROR	F	F	T	T	0	192.169.17.3	4.000000	F
+1531687175.598301	CNjL5d4o5z2c92Dm9j	10.0.0.2	54396	192.168.5.20	53	udp	55477	-	another_fakewebsite.org	1	C_INTERNET	28	AAAA	0	NOERROR	F	F	T	F	0	-	-	F
+1531687177.554304	Ck8RXy3A5mMYpuaMPl	10.0.0.2	54580	192.168.5.20	53	udp	53805	0.015983	doesnotexist.com	1	C_INTERNET	28	AAAA	0	NOERROR	F	F	T	T	0	services.fake.com	28.000000	F
+1531687177.886294	CQPWD5kcGNGECLpQe	10.0.0.2	43739	192.168.5.20	53	udp	1917	-	imageoninternet.net	1	C_INTERNET	28	AAAA	0	NOERROR	F	F	T	F	0	-	-	F
+#close	2018-07-15-16-40-00

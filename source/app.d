@@ -16,20 +16,34 @@
 import std.stdio;
 import std.getopt;
 
+import parser;
 
-void main(string[] args)
-{
-    string log_path;
-    string out_path;
 
-    auto helpInformation = getopt (
-            args,
-            "log_path|l", "Path to bro logs", &log_path,
-            "out_path|o", "Path to output analysis results", &out_path,
-            );
+version(unittest) {}
+else {
+    void main(string[] args)
+    {
+        string log_path;
+        string out_path;
 
-    if (helpInformation.helpWanted) {
-        defaultGetoptPrinter("anendektos - bro log parser and statisical analyser",
-                helpInformation.options);
+        auto helpInformation = getopt (
+                args,
+                "log_path|l", "Path to bro logs", &log_path,
+                "out_path|o", "Path to output analysis results", &out_path,
+                );
+
+        if (helpInformation.helpWanted) {
+            defaultGetoptPrinter("anendektos - bro log parser and summarizer",
+                    helpInformation.options);
+        }
+
+        if (log_path && out_path) {
+            parser.Parser log_parser = new parser.Parser();
+            log_parser.log_path = log_path;
+            log_parser.out_path = out_path;
+            log_parser.parse_logs();
+        } else {
+            writeln("ERROR: You must pass both an input and output directory!");
+        }
     }
 }
