@@ -5,7 +5,7 @@
 	],
 	"description": "ἀνένδεκτος - A bro log parser and summarizer",
 	"copyright": "Copyright © 2018, Steven Oliver",
-	"license": "Apache-2.0",
+	"license": "MPL-2.0",
         "unit-threaded": "~>0.7.46",
         "configurations": [
         { "name": "executable" },
