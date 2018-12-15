@@ -15,16 +15,23 @@ else {
     {
         string log_path;
         string out_path;
+        bool app_version;
 
         auto helpInformation = getopt (
                 args,
                 "log_path|l", "Path to bro logs", &log_path,
                 "out_path|o", "Path to output analysis results", &out_path,
+                "version|v", "Version information", &app_version,
                 );
 
         if (helpInformation.helpWanted) {
             defaultGetoptPrinter("anendektos - bro log parser and summarizer",
                     helpInformation.options);
+        }
+
+        if (app_version) {
+            writeln("anendektos - 1.0.0");
+            return;
         }
 
         if (log_path && out_path) {
