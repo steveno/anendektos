@@ -62,6 +62,66 @@ class Dns : Parser {
             cur_record.resp_h = parseAddress(line[4]);
             cur_record.resp_p = to!int(line[5]);
             cur_record.proto = line[6];
+            cur_record.trans_id = line[7];
+            cur_record.rtt = to!int(line[8]);
+            cur_record.query = to!float(line[9]);
+            cur_record.qclass = to!int(line[10]);
+            cur_record.qclass_name = line[11];
+            cur_record.qtype = to!int(line[12]);
+            cur_record.qtype_name = line[13];
+            cur_record.rcode = to!int(line[14]);
+            cur_record.rcode_name = line[15];
+
+            // Convert 0 and 1 to bool
+            if (line[16] != header.unset_field) {
+                if (line[16] == "0") {
+                    cur_record.AA = false;
+                } else {
+                    cur_record.AA = true;
+                }
+            }
+
+            if (line[17] != header.unset_field) {
+                if (line[17] == "0") {
+                    cur_record.TC = false;
+                } else {
+                    cur_record.TC = true;
+                }
+            }
+
+            if (line[18] != header.unset_field) {
+                if (line[18] == "0") {
+                    cur_record.RD = false;
+                } else {
+                    cur_record.RD = true;
+                }
+            }
+
+            if (line[19] != header.unset_field) {
+                if (line[19] == "0") {
+                    cur_record.RA = false;
+                } else {
+                    cur_record.RA = true;
+                }
+            }
+
+            cur_record.Z = to!int(line[20]);
+
+            if (line[21] != header.empty_field)
+                cur_record.answers = line[21].split(header.set_seperator);
+
+            if (line[22] != header.empty_field)
+                for (size_t i = 0; i < line[22].split(header.set_seperator).length; i++) {
+                    cur_record.TTLs[i] = to!float(line[22].split(header.set_seperator)[i]);
+                }
+
+            if (line[23] != header.unset_field) {
+                if (line[23] == "0") {
+                    cur_record.rejected = false;
+                } else {
+                    cur_record.rejected = true;
+                }
+            }
 
             ++rec_num;
             contents[rec_num] = cur_record;
