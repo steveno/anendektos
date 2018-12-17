@@ -23,8 +23,8 @@ class Dns : Parser {
         int resp_p;
         string proto;
         string trans_id;
-        int rtt;
-        float query;
+        float rtt;
+        string query;
         int qclass;
         string qclass_name;
         int qtype;
@@ -63,8 +63,11 @@ class Dns : Parser {
             cur_record.resp_p = to!int(line[5]);
             cur_record.proto = line[6];
             cur_record.trans_id = line[7];
-            cur_record.rtt = to!int(line[8]);
-            cur_record.query = to!float(line[9]);
+
+            if (line[8] != header.unset_field)
+                cur_record.rtt = to!float(line[8]);
+
+            cur_record.query = line[9];
             cur_record.qclass = to!int(line[10]);
             cur_record.qclass_name = line[11];
             cur_record.qtype = to!int(line[12]);
@@ -111,7 +114,7 @@ class Dns : Parser {
                 cur_record.answers = line[21].split(header.set_seperator);
 
             if (line[22] != header.empty_field)
-                for (size_t i = 0; i < line[22].split(header.set_seperator).length; i++) {
+                foreach (i; 0 .. line[22].split(header.set_seperator).length - 1) {
                     cur_record.TTLs[i] = to!float(line[22].split(header.set_seperator)[i]);
                 }
 
