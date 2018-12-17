@@ -9,6 +9,7 @@ import std.conv;
 import std.socket;
 import std.stdio;
 import std.string;
+import std.typecons;
 
 import parser;
 
@@ -27,8 +28,8 @@ class Conn : Parser {
         int orig_bytes;
         int resp_bytes;
         string conn_state;
-        string local_orig;
-        string local_resp;
+        Nullable!(bool) local_orig;
+        Nullable!(bool) local_resp;
         int missed_bytes;
         string history;
         int orig_pkts;
@@ -71,18 +72,18 @@ class Conn : Parser {
             // Convert 0 and 1 to bool
             if (line[12] != header.unset_field) {
                 if (line[12] == "0") {
-                    cur_record.local_orig = "false";
+                    cur_record.local_orig = false;
                 } else {
-                    cur_record.local_orig = "true";
+                    cur_record.local_orig = true;
                 }
 
             }
 
             if (line[13] != header.unset_field) {
                 if (line[13] == "0") {
-                    cur_record.local_resp = "false";
+                    cur_record.local_resp = false;
                 } else {
-                    cur_record.local_resp = "true";
+                    cur_record.local_resp = true;
                 }
             }
 
@@ -124,7 +125,7 @@ version(unittest) {
     }
 
     @("conn_read_header")
-    unittest
+    @safe unittest
     {
         header.seperator.should == "\t";
         header.set_seperator.should == ",";
@@ -134,13 +135,13 @@ version(unittest) {
     }
 
     @("conn_record_count")
-    unittest
+    @safe unittest
     {
         results.length.should == 6;
     }
 
     @("conn_read_record_1")
-    unittest
+    @safe unittest
     {
         results[1].ts.should == 1531687176.789848;
         results[1].uid.should == "CI3wQF1KHxU6G7VmTj";
@@ -154,8 +155,8 @@ version(unittest) {
         results[1].orig_bytes.should == 1859;
         results[1].resp_bytes.should == 524;
         results[1].conn_state.should == "RSTRH";
-        results[1].local_orig.should == null;
-        results[1].local_resp.should == null;
+        assert(results[1].local_orig.isNull);
+        assert(results[1].local_resp.isNull);
         results[1].missed_bytes.should == 0;
         results[1].history.should == "^dADar";
         results[1].orig_pkts.should == 4;
@@ -166,7 +167,7 @@ version(unittest) {
     }
 
     @("conn_read_record_2")
-    unittest
+    @safe unittest
     {
         results[2].ts.should == 1531687179.369649;
         results[2].uid.should == "CseN5l3TT2T9wz29gd";
@@ -180,8 +181,8 @@ version(unittest) {
         results[2].orig_bytes.should == 636;
         results[2].resp_bytes.should == 191;
         results[2].conn_state.should == "SF";
-        results[2].local_orig.should == null;
-        results[2].local_resp.should == null;
+        assert(results[2].local_orig.isNull);
+        assert(results[2].local_resp.isNull);
         results[2].missed_bytes.should == 0;
         results[2].history.should == "ShADadFRfR";
         results[2].orig_pkts.should == 10;
@@ -192,7 +193,7 @@ version(unittest) {
     }
 
     @("conn_read_record_3")
-    unittest
+    @safe unittest
     {
         results[3].ts.should == 1531687180.264430;
         results[3].uid.should == "CF9cy31JmjzAbGWlXb";
@@ -206,8 +207,8 @@ version(unittest) {
         results[3].orig_bytes.should == 16375;
         results[3].resp_bytes.should == 728861;
         results[3].conn_state.should == "OTH";
-        results[3].local_orig.should == null;
-        results[3].local_resp.should == null;
+        assert(results[3].local_orig.isNull);
+        assert(results[3].local_resp.isNull);
         results[3].missed_bytes.should == 0;
         results[3].history.should == "DadAc";
         results[3].orig_pkts.should == 194;
@@ -218,7 +219,7 @@ version(unittest) {
     }
 
     @("conn_read_record_4")
-    unittest
+    @safe unittest
     {
         results[4].ts.should == 1531687185.282211;
         results[4].uid.should == "CuVIzg2991yFw6ZZl";
@@ -232,8 +233,8 @@ version(unittest) {
         results[4].orig_bytes.should == 435;
         results[4].resp_bytes.should == 705;
         results[4].conn_state.should == "S1";
-        results[4].local_orig.should == null;
-        results[4].local_resp.should == null;
+        assert(results[4].local_orig.isNull);
+        assert(results[4].local_resp.isNull);
         results[4].missed_bytes.should == 0;
         results[4].history.should == "ShADad";
         results[4].orig_pkts.should == 5;
@@ -244,7 +245,7 @@ version(unittest) {
     }
 
     @("conn_read_record_5")
-    unittest
+    @safe unittest
     {
         results[5].ts.should == 1531687174.944154;
         results[5].uid.should == "CTs6Ib3G1SsnrfuJak";
@@ -258,8 +259,8 @@ version(unittest) {
         results[5].orig_bytes.should == 896;
         results[5].resp_bytes.should == 0;
         results[5].conn_state.should == "OTH";
-        results[5].local_orig.should == null;
-        results[5].local_resp.should == null;
+        assert(results[5].local_orig.isNull);
+        assert(results[5].local_resp.isNull);
         results[5].missed_bytes.should == 0;
         results[5].history.should == null;
         results[5].orig_pkts.should == 8;
@@ -270,7 +271,7 @@ version(unittest) {
     }
 
     @("conn_read_record_6")
-    unittest
+    @safe unittest
     {
         results[6].ts.should == 1531687188.273921;
         results[6].uid.should == "Cjo73l2bKMuyYcFUH";
@@ -284,8 +285,8 @@ version(unittest) {
         results[6].orig_bytes.should == 24;
         results[6].resp_bytes.should == 16;
         results[6].conn_state.should == "OTH";
-        results[6].local_orig.should == null;
-        results[6].local_resp.should == null;
+        assert(results[6].local_orig.isNull);
+        assert(results[6].local_resp.isNull);
         results[6].missed_bytes.should == 0;
         results[6].history.should == null;
         results[6].orig_pkts.should == 1;
