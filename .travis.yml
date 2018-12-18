@@ -1,0 +1,11 @@
+sudo: false
+dist: trusty
+language: d
+
+d:
+  - dmd
+  - ldc
+
+script:
+  - dub test --compiler=${DC}
+  - dub build --compiler=${DC}
