@@ -1,7 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 module parser;
 
@@ -11,12 +10,16 @@ import std.parallelism;
 import std.stdio;
 import std.string;
 
+import dlogg.log;
+import dlogg.strict;
+
 import parsers.conn;
 import parsers.dns;
+import parsers.http;
 
 
 class Parser {
-    string log_path;
+    string bro_path;
     string out_path;
     immutable string log_suffix = ".log";
     struct Header {
@@ -29,7 +32,10 @@ class Parser {
     };
 
     public void parse_logs() {
-        auto log_files = dirEntries(this.log_path, SpanMode.shallow);
+	shared ILogger logger = new shared StrictLogger("my_awesome_log.log");
+	logger.logInfo("Info message from parsers.d!");
+
+        auto log_files = dirEntries(this.bro_path, SpanMode.shallow);
         File file;
         Header header;
         foreach (d; parallel(log_files, 1)) {
@@ -42,20 +48,24 @@ class Parser {
             file = File(log_file, "r");
             header = parse_log_header(file);
             if (header.path == "conn") {
+
                 auto conn = new Conn();
                 conn.parse_file(header, file);
             } else if (header.path == "dns") {
                 auto dns = new Dns();
                 dns.parse_file(header, file);
             } else if (header.path == "http") {
+                auto http = new Http();
+                http.parse_file(header, file);
+            } else if (header.path == "files") {
                 writeln("ERROR: NOT IMPLEMENTED");
+                //auto files = new Files();
+                //files.parse_file(header, file);
             } else if (header.path == "packet_filter") {
                 writeln("ERROR: NOT IMPLEMENTED");
             } else if (header.path == "reporter") {
                 writeln("ERROR: NOT IMPLEMENTED");
             } else if (header.path == "ssl") {
-                writeln("ERROR: NOT IMPLEMENTED");
-            } else if (header.path == "weird") {
                 writeln("ERROR: NOT IMPLEMENTED");
             } else if (header.path == "x509") {
                 writeln("ERROR: NOT IMPLEMENTED");
@@ -118,7 +128,10 @@ class Parser {
 
     private static @safe pure string convHex(string hexData) {
         int cnt = 0;
-        char[] result; result.length = 2; foreach (char c; hexData)
+        char[] result;
+        result.length = 2;
+
+        foreach (char c; hexData)
         {
             cnt += 1;
             if (cnt > 2) {
@@ -167,7 +180,7 @@ version(unittest) {
     }
 
     @("convert_hex_to_string")
-    unittest
+    @safe pure unittest
     {
         Parser.convHex("\\x09").should == "\t";
         Parser.convHex("\\x20").should == " ";
