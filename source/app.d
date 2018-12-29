@@ -1,46 +1,40 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import std.file;
 import std.stdio;
-import std.getopt;
 
+import dlogg.log;
+import dlogg.strict;
+
+import arguments;
 import parser;
 
 
 version(unittest) {}
 else {
-    void main(string[] args)
+    int main(string[] args)
     {
-        string log_path;
-        string out_path;
-        bool app_version;
-
-        auto helpInformation = getopt (
-                args,
-                "log_path|l", "Path to bro logs", &log_path,
-                "out_path|o", "Path to output analysis results", &out_path,
-                "version|v", "Version information", &app_version,
-                );
-
-        if (helpInformation.helpWanted) {
-            defaultGetoptPrinter("anendektos - bro log parser and summarizer",
-                    helpInformation.options);
+        arguments.Arguments arg_parser = new arguments.Arguments();
+        string msg = arg_parser.parse_arguments(args);
+        if (msg != "") {
+            stderr.writeln(msg);
+            return 1;
         }
 
-        if (app_version) {
-            writeln("anendektos - 1.0.0");
-            return;
-        }
+        shared ILogger logger = new shared StrictLogger("anendektos.log");
 
-        if (log_path && out_path) {
-            parser.Parser log_parser = new parser.Parser();
-            log_parser.log_path = log_path;
-            log_parser.out_path = out_path;
-            log_parser.parse_logs();
-        } else {
-            writeln("ERROR: You must pass both an input and output directory!");
-        }
+        if (arg_parser.bro_path != "" && arg_parser.out_path != "")
+            parse_logs(arg_parser.bro_path, arg_parser.out_path);
+
+        return 0;
     }
+}
+
+void parse_logs(string bro_path, string out_path) {
+    parser.Parser log_parser = new parser.Parser();
+    log_parser.bro_path = bro_path;
+    log_parser.out_path = out_path;
+    log_parser.parse_logs();
 }
