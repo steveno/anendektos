@@ -2,6 +2,7 @@
 	"fileVersion": 1,
 	"versions": {
 		"colorize": "1.0.5",
+		"dini": "2.0.0",
 		"dlogg": "0.4.1",
 		"unit-threaded": "0.7.53"
 	}

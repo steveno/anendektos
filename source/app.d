@@ -9,6 +9,7 @@ import dlogg.log;
 import dlogg.strict;
 
 import arguments;
+import config;
 import parser;
 
 
@@ -16,6 +17,7 @@ version(unittest) {}
 else {
     int main(string[] args)
     {
+        // Parse arguments from the command line
         arguments.Arguments arg_parser = new arguments.Arguments();
         string msg = arg_parser.parse_arguments(args);
         if (msg != "") {
@@ -23,10 +25,45 @@ else {
             return 1;
         }
 
-        shared ILogger logger = new shared StrictLogger("anendektos.log");
+        // If a config path was passed in use it
+        if (arg_parser.config_path != "") {
+            config.Config options = config.Config.get(arg_parser.config_path);
 
-        if (arg_parser.bro_path != "" && arg_parser.out_path != "")
-            parse_logs(arg_parser.bro_path, arg_parser.out_path);
+            shared ILogger logger = new shared StrictLogger(options.ini["application"].getKey("log_file"));
+            switch (options.ini["application"].getKey("log_level"))
+            {
+                default:
+                stderr.writefln("Unknown log_level configuration option \"%s\"", options.ini["application"].getKey("log_level"));
+                return 1;
+
+                case "Notice":
+                logger.minOutputLevel = LoggingLevel.Notice;
+                break;
+
+                case "Warning":
+                logger.minOutputLevel = LoggingLevel.Warning;
+                break;
+
+                case "Debug":
+                logger.minOutputLevel = LoggingLevel.Debug;
+                break;
+
+                case "Fatal":
+                logger.minOutputLevel = LoggingLevel.Fatal;
+                break;
+
+                case "Muted":
+                logger.minOutputLevel = LoggingLevel.Muted;
+                break;
+            }
+
+            parse_logs(options.ini["application"].getKey("bro_path"), options.ini["application"].getKey("out_path"));
+        }
+        // Since no config file was given see if any other command line arguments were given
+        else {
+            if (arg_parser.bro_path != "" && arg_parser.out_path != "")
+                parse_logs(arg_parser.bro_path, arg_parser.out_path);
+        }
 
         return 0;
     }
