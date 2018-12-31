@@ -11,11 +11,11 @@ class Arguments {
     string bro_path = "";
     string out_path = "";
     string config_path = "";
-    
+
     public string parse_arguments(string[] args) {
         string ret_msg = "";
 
-        foreach (ulong i; 0 .. args.length) {
+        foreach (ulong i; 1 .. args.length) {
             if (args[i] == "--help" || args[i] == "-h") {
                 print_help();
                 break;
@@ -29,8 +29,9 @@ class Arguments {
             if (args[i] == "config_path") {
                 if (i + 1 < args.length) {
                     this.config_path = args[i + 1];
+                    continue;
                 } else {
-                    ret_msg = "--config_path must be passed with a path";
+                    ret_msg = "config_path must be passed with a path";
                     break;
                 }
             }
@@ -38,8 +39,9 @@ class Arguments {
             if (args[i] == "bro_path") {
                 if (i + 1 < args.length) {
                     bro_path = args[i + 1];
+                    continue;
                 } else {
-                    ret_msg = "--bro_path must be passed with a path";
+                    ret_msg = "bro_path must be passed with a path";
                     break;
                 }
             }
@@ -47,11 +49,16 @@ class Arguments {
             if (args[i] == "out_path") {
                 if (i + 1 < args.length) {
                     out_path = args[i + 1];
+                    continue;
                 } else {
-                    ret_msg = "--out_path must be passed with a path";
+                    ret_msg = "out_path must be passed with a path";
                     break;
                 }
             }
+
+            stderr.writefln("ERROR Unknown command line argument %s", args[i]);
+            print_help();
+            break;
         }
 
         return ret_msg;
