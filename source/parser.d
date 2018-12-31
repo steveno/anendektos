@@ -32,9 +32,6 @@ class Parser {
     };
 
     public void parse_logs() {
-	shared ILogger logger = new shared StrictLogger("my_awesome_log.log");
-	logger.logInfo("Info message from parsers.d!");
-
         auto log_files = dirEntries(this.bro_path, SpanMode.shallow);
         File file;
         Header header;
@@ -48,7 +45,6 @@ class Parser {
             file = File(log_file, "r");
             header = parse_log_header(file);
             if (header.path == "conn") {
-
                 auto conn = new Conn();
                 conn.parse_file(header, file);
             } else if (header.path == "dns") {
@@ -58,9 +54,8 @@ class Parser {
                 auto http = new Http();
                 http.parse_file(header, file);
             } else if (header.path == "files") {
-                writeln("ERROR: NOT IMPLEMENTED");
-                //auto files = new Files();
-                //files.parse_file(header, file);
+                auto files = new Files();
+                files.parse_file(header, file);
             } else if (header.path == "packet_filter") {
                 writeln("ERROR: NOT IMPLEMENTED");
             } else if (header.path == "reporter") {
