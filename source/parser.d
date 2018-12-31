@@ -15,6 +15,7 @@ import dlogg.strict;
 
 import parsers.conn;
 import parsers.dns;
+import parsers.files;
 import parsers.http;
 
 
