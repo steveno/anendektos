@@ -6,6 +6,6 @@ anendektos
 
 ἀνένδεκτος - A bro log file parser and summarizer
 
-Developed using the followig:
-* D   - 2.081.1
+Developed using the following:
+* D   - 2.083.1
 * bro - 2.5.3
