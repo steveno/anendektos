@@ -23,6 +23,7 @@ class Parser {
     string bro_path;
     string out_path;
     immutable string log_suffix = ".log";
+
     struct Header {
         string seperator;
         string set_seperator;
@@ -36,6 +37,7 @@ class Parser {
         auto log_files = dirEntries(this.bro_path, SpanMode.shallow);
         File file;
         Header header;
+
         foreach (d; parallel(log_files, 1)) {
             string log_file;
             if (!d.name.endsWith(this.log_suffix))
