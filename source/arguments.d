@@ -97,37 +97,73 @@ Named arguments
 
 version(unittest) {
     import unit_threaded;
-/*
+
+    /*
     @("arguments_help_long")
     unittest
     {
-        auto m = mock!Arguments();
-        m.parse_arguments(["./anendektos", "--help"]);
-        m.expectCalled!"print_help"();
+        // TODO
     }
 
     @("arguments_help_short")
     unittest
     {
-        auto m = mock!Arguments;
-        m.parse_arguments(["./anendektos", "-h"]);
-        m.expectCalled!"print_help"();
+        // TODO
     }
 
     @("arguments_version_long")
     unittest
     {
-        auto m = mock!Arguments;
-        m.parse_arguments(["./anendektos", "--version"]);
-        m.expectCalled!"print_version"();
+        // TODO
     }
 
     @("arguments_version_short")
     unittest
     {
-        auto m = mock!Arguments;
-        m.parse_arguments(["./anendektos", "-v"]);
-        m.expectCalled!"print_version"();
+        // TODO
     }
     */
+
+    @("arguments_config_path")
+    unittest
+    {
+        auto args = new Arguments();
+        args.parse_arguments(["./test", "config_path", "/home/user/user.ini"]);
+        args.config_path.should == "/home/user/user.ini";
+    }
+
+    @("arguments_bro_path")
+    unittest
+    {
+        auto args = new Arguments();
+        args.parse_arguments(["./test", "bro_path", "/home/user/bro"]);
+        args.bro_path.should == "/home/user/bro";
+    }
+
+    @("arguments_out_path")
+    unittest
+    {
+        auto args = new Arguments();
+        args.parse_arguments(["./test", "out_path", "/home/user/out"]);
+        args.out_path.should == "/home/user/out";
+    }
+
+    @("arguments_bro_out_path")
+    unittest
+    {
+        auto args = new Arguments();
+        args.parse_arguments(["./test", "bro_path", "/home/user/bro", "out_path", "/home/user/out"]);
+        args.out_path.should == "/home/user/out";
+        args.bro_path.should == "/home/user/bro";
+    }
+
+    @("arguments_bro_out_config_path")
+    unittest
+    {
+        auto args = new Arguments();
+        args.parse_arguments(["./test", "bro_path", "/home/user/bro", "out_path", "/home/user/out", "config_path", "/home/user/user.ini"]);
+        args.out_path.should == "/home/user/out";
+        args.bro_path.should == "/home/user/bro";
+        args.config_path.should == "/home/user/user.ini";
+    }
 }
