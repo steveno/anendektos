@@ -17,6 +17,12 @@ version(unittest) {}
 else {
     int main(string[] args)
     {
+        // We require at least one argument
+        if (args.length < 2) {
+            stderr.writeln("At least one command line argument is required");
+            return 1;
+        }
+
         // Parse arguments from the command line
         arguments.Arguments arg_parser = new arguments.Arguments();
         string msg = arg_parser.parse_arguments(args);
@@ -70,8 +76,6 @@ else {
 }
 
 void parse_logs(string bro_path, string out_path) {
-    parser.Parser log_parser = new parser.Parser();
-    log_parser.bro_path = bro_path;
-    log_parser.out_path = out_path;
+    parser.Parser log_parser = new parser.Parser(bro_path, out_path);
     log_parser.parse_logs();
 }
