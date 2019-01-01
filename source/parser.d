@@ -20,9 +20,9 @@ import parsers.http;
 
 
 class Parser {
-    string bro_path;
-    string out_path;
-    immutable string log_suffix = ".log";
+    private string bro_path;
+    private string out_path;
+    private immutable string log_suffix = ".log";
 
     struct Header {
         string seperator;
@@ -32,6 +32,14 @@ class Parser {
         string path;
         string[] fields;
     };
+
+    this() {
+    }
+
+    this(string bro_path, string out_path) {
+        this.bro_path = bro_path;
+        this.out_path = out_path;
+    }
 
     public void parse_logs() {
         auto log_files = dirEntries(this.bro_path, SpanMode.shallow);
