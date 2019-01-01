@@ -7,9 +7,9 @@
 #fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	proto	service	duration	orig_bytes	resp_bytes	conn_state	local_orig	local_resp	missed_bytes	history	orig_pkts	orig_ip_bytes	resp_pkts	resp_ip_bytes	tunnel_parents
 #types	time	string	addr	port	addr	port	enum	string	interval	count	count	string	bool	bool	count	string	count	count	count	count	set[string]
 1531687176.789848	CI3wQF1KHxU6G7VmTj	10.0.0.2	60716	192.168.1.4	443	tcp	-	0.170522	1859	524	RSTRH	-	-	0	^dADar	4	2498	3	668	(empty)
-1531687179.369649	CseN5l3TT2T9wz29gd	10.0.0.2	49228	192.168.8.2	443	tcp	ssl	5.226249	636	191	SF	-	-	0	ShADadFRfR	10	1128	8	615	(empty)
-1531687180.264430	CF9cy31JmjzAbGWlXb	fe80:541:4303:db20:9db7:490b:983b:62ca	48804	fe80:f8b0:4004:805::200e	443	tcp	-	16.770906	16375	728861	OTH	-	-	0	DadAc	194	30355	221	524307	(empty)
-1531687185.282211	CuVIzg2991yFw6ZZl	fe80:541:4303:db20:9db7:490b:983b:62ca	45548	fe80:f8b0:4004:805::200e	80	tcp	http	10.129878	435	705	S1	-	-	0	ShADad	5	803	4	1001	(empty)
-1531687174.944154	CTs6Ib3G1SsnrfuJak	fe80::250:f1ff:fe80:0	134	fe80::1	133	icmp	-	24.268761	896	0	OTH	-	-	0	-	8	1280	0	0	(empty)
+1531687179.369649	CseN5l3TT2T9wz29gd	10.0.0.2	49228	192.168.8.2	443	tcp	ssl	5.226249	636	191	SF	1	-	0	ShADadFRfR	10	1128	8	615	(empty)
+1531687180.264430	CF9cy31JmjzAbGWlXb	fe80:541:4303:db20:9db7:490b:983b:62ca	48804	fe80:f8b0:4004:805::200e	443	tcp	-	16.770906	16375	728861	OTH	0	-	0	DadAc	194	30355	221	524307	(empty)
+1531687185.282211	CuVIzg2991yFw6ZZl	fe80:541:4303:db20:9db7:490b:983b:62ca	45548	fe80:f8b0:4004:805::200e	80	tcp	http	10.129878	435	705	S1	-	1	0	ShADad	5	803	4	1001	(empty)
+1531687174.944154	CTs6Ib3G1SsnrfuJak	fe80::250:f1ff:fe80:0	134	fe80::1	133	icmp	-	24.268761	896	0	OTH	-	0	0	-	8	1280	0	0	(empty)
 1531687188.273921	Cjo73l2bKMuyYcFUH	fe80::250:f1ff:fe80:0	135	fe80:541:4303:db20:9db7:490b:983b:62ca	136	icmp	-	0.000027	24	16	OTH	-	-	0	-	1	72	1	64	(empty)
 #close	2018-07-15-16-40-00

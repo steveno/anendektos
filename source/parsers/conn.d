@@ -180,7 +180,7 @@ version(unittest) {
         results[2].orig_bytes.should == 636;
         results[2].resp_bytes.should == 191;
         results[2].conn_state.should == "SF";
-        assert(results[2].local_orig.isNull);
+        results[2].local_orig.should == true;
         assert(results[2].local_resp.isNull);
         results[2].missed_bytes.should == 0;
         results[2].history.should == "ShADadFRfR";
@@ -206,7 +206,7 @@ version(unittest) {
         results[3].orig_bytes.should == 16375;
         results[3].resp_bytes.should == 728861;
         results[3].conn_state.should == "OTH";
-        assert(results[3].local_orig.isNull);
+        results[3].local_orig.should == false;
         assert(results[3].local_resp.isNull);
         results[3].missed_bytes.should == 0;
         results[3].history.should == "DadAc";
@@ -233,7 +233,7 @@ version(unittest) {
         results[4].resp_bytes.should == 705;
         results[4].conn_state.should == "S1";
         assert(results[4].local_orig.isNull);
-        assert(results[4].local_resp.isNull);
+        results[4].local_resp.should == true;
         results[4].missed_bytes.should == 0;
         results[4].history.should == "ShADad";
         results[4].orig_pkts.should == 5;
@@ -259,7 +259,7 @@ version(unittest) {
         results[5].resp_bytes.should == 0;
         results[5].conn_state.should == "OTH";
         assert(results[5].local_orig.isNull);
-        assert(results[5].local_resp.isNull);
+        results[5].local_resp.should == false;
         results[5].missed_bytes.should == 0;
         results[5].history.should == null;
         results[5].orig_pkts.should == 8;

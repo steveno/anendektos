@@ -187,7 +187,7 @@ version(unittest) {
         results[1].qtype_name.should == "A";
         results[1].rcode.should == 0;
         results[1].rcode_name.should == "NOERROR";
-        results[1].AA.should == false;
+        results[1].AA.should == true;
         results[1].TC.should == false;
         results[1].RD.should == true;
         results[1].RA.should == true;
@@ -217,7 +217,7 @@ version(unittest) {
         results[2].rcode.should == 0;
         results[2].rcode_name.should == "NOERROR";
         results[2].AA.should == false;
-        results[2].TC.should == false;
+        results[2].TC.should == true;
         results[2].RD.should == true;
         results[2].RA.should == false;
         results[2].Z.should == 0;
@@ -247,7 +247,7 @@ version(unittest) {
         results[3].rcode_name.should == "NOERROR";
         results[3].AA.should == false;
         results[3].TC.should == false;
-        results[3].RD.should == true;
+        results[3].RD.should == false;
         results[3].RA.should == true;
         results[3].Z.should == 0;
         results[3].answers.should == ["services.fake.com"];
@@ -281,6 +281,6 @@ version(unittest) {
         results[4].Z.should == 0;
         results[4].answers.shouldBeEmpty();
         results[4].TTLs.shouldBeEmpty();
-        results[4].rejected.should == false;
+        results[4].rejected.should == true;
     }
 }
