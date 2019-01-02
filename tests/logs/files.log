@@ -6,8 +6,8 @@
 #open	2018-07-15-16-39-35
 #fields	ts	fuid	tx_hosts	rx_hosts	conn_uids	source	depth	analyzers	mime_type	filename	duration	local_orig	is_orig	seen_bytes	total_bytes	missing_bytes	overflow_bytes	timedout	parent_fuid	md5	sha1	sha256	extracted	extracted_cutoff	extracted_size
 #types	time	string	set[addr]	set[addr]	set[string]	string	count	set[string]	string	string	interval	bool	bool	count	count	count	count	bool	string	string	string	string	string	bool	count
-1531687175.678291	FqxvGx22DT6AwxHGPl	10.0.0.5	10.0.0.2	C49NlPigbiwRa1aJ3	SSL	0	X509,MD5,SHA1	application/pkix-cert	-	0.000000	-	F	1964	-	0	0	F	-	5c7ef8e7311db007a796fcfb69335e68	ccaa484866460e91532c9c7c232ab1744d299d33	-	-	-	-
-1531687185.306279	FFRgqxygVeipwAvKl	fe80::250:f1ff:fe80:0	fe80:541:4303:db20:9db7:490b:983b:62ca	CuVIzg2991yFw6ZZl	HTTP	0	(empty)	application/ocsp-request	-	0.000000	-	T	75	75	0	0	F	-	-	-	-	-	-	-
-1531687191.158275	FHDk0m2U0SNRGPYN5g	10.0.0.2	10.0.0.3	Czi9O3kaUI8DpgVCd	HTTP	0	(empty)	application/ocsp-request	-	0.000000	-	T	83	83	0	0	F	-	-	-	-	-	-	-
-1531687191.190277	F6sICI3IY4vu5U4ys1	10.0.0.4	10.0.0.2	Czi9O3kaUI8DpgVCd	HTTP	0	(empty)	application/ocsp-response	-	0.000000	-	F	471	471	0	0	F	-	-	-	-	-	-	-
+1531687175.678291	FqxvGx22DT6AwxHGPl	10.0.0.5	10.0.0.2	C49NlPigbiwRa1aJ3	SSL	0	X509,MD5,SHA1	application/pkix-cert	test_filename	0.000000	T	F	1964	-	0	0	F	-	5c7ef8e7311db007a796fcfb69335e68	ccaa484866460e91532c9c7c232ab1744d299d33	-	-	-	-
+1531687185.306279	FFRgqxygVeipwAvKl	fe80::250:f1ff:fe80:0	fe80:541:4303:db20:9db7:490b:983b:62ca	CuVIzg2991yFw6ZZl	HTTP	0	(empty)	application/ocsp-request	-	0.000000	F	T	75	75	0	0	F	-	-	-	-	-	-	-
+1531687191.158275	FHDk0m2U0SNRGPYN5g	10.0.0.2	10.0.0.3	Czi9O3kaUI8DpgVCd	HTTP	0	(empty)	application/ocsp-request	-	0.000000	-	T	83	83	0	0	T	-	-	-	-	-	F	-
+1531687191.190277	F6sICI3IY4vu5U4ys1	10.0.0.4	10.0.0.2	Czi9O3kaUI8DpgVCd	HTTP	0	(empty)	application/ocsp-response	-	0.000000	-	F	471	471	0	0	F	-	-	-	-	-	T	1800
 #close	2018-07-15-16-40-00

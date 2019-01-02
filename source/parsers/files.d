@@ -210,9 +210,9 @@ version(unittest) {
         results[1].depth.should == 0;
         results[1].analyzers.should == ["X509", "MD5", "SHA1"];
         results[1].mime_type.should == "application/pkix-cert";
-        assert(results[1].filename.isNull);
+        results[1].filename.should == "test_filename";
         results[1].duration.should == 0.000000;
-        assert(results[1].local_orig.isNull);
+        results[1].local_orig.should == true;
         results[1].is_orig.should == false;
         results[1].seen_bytes.should == 1964;
         assert(results[1].total_bytes.isNull);
@@ -253,7 +253,7 @@ version(unittest) {
         results[2].mime_type.should == "application/ocsp-request";
         assert(results[2].filename.isNull);
         results[2].duration.should == 0.000000;
-        assert(results[2].local_orig.isNull);
+        results[2].local_orig.should == false;
         results[2].is_orig.should == true;
         results[2].seen_bytes.should == 75;
         results[2].total_bytes.should == 75;
@@ -300,13 +300,13 @@ version(unittest) {
         results[3].total_bytes.should == 83;
         results[3].missing_bytes.should == 0;
         results[3].overflow_bytes.should == 0;
-        results[3].timedout.should == false;
+        results[3].timedout.should == true;
         assert(results[3].parent_fuid.isNull);
         assert(results[3].md5.isNull);
         assert(results[3].sha1.isNull);
         assert(results[3].sha256.isNull);
         assert(results[3].extracted.isNull);
-        assert(results[3].extracted_cutoff.isNull);
+        results[3].extracted_cutoff.should == false;
         assert(results[3].extracted_size.isNull);
     }
 
@@ -347,7 +347,7 @@ version(unittest) {
         assert(results[4].sha1.isNull);
         assert(results[4].sha256.isNull);
         assert(results[4].extracted.isNull);
-        assert(results[4].extracted_cutoff.isNull);
-        assert(results[4].extracted_size.isNull);
+        results[4].extracted_cutoff.should == true;
+        results[4].extracted_size.should == 1800;
     }
 }
