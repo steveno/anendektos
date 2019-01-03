@@ -17,6 +17,7 @@ import parsers.conn;
 import parsers.dns;
 import parsers.files;
 import parsers.http;
+import parsers.ssl;
 
 
 class Parser {
