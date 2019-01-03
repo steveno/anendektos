@@ -1,0 +1,13 @@
+#separator \x09																				
+#set_separator	,																			
+#empty_field	(empty)																			
+#unset_field	-																			
+#path	ssl																			
+#open	2018-07-15-16-39-35																			
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	version	cipher	curve	server_name	resumed	last_alert	next_protocol	established	cert_chain_fuids	client_cert_chain_fuids	subject	issuer	client_subject	client_issuer
+#types	time	string	addr	port	addr	port	string	string	string	string	bool	string	string	bool	vector[string]	vector[string]	string	string	string	string
+1531687175.6463	C49NlPigbiwRa1aJ3	10.0.0.2	49204	10.0.202.133	443	TLSv12	TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256	x25519	avatars.content.com	F	-	http/1.1	T	FqxvGx22DT6AwxHGPl,FwwOhm4iR4jYQbaAS	(empty)	CN=www.content.com,O=Content\\, Inc.,L=Hometown,ST=California,C=US	CN=DigiCert SHA2 High Assurance Server CA,OU=www.digicert.com,O=DigiCert Inc,C=US	-	-	
+1531687177.91832	C4nlzv2oCPsTUEf7bb	10.0.0.2	40748	10.2.4.3	443	TLSv12	TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256	-	img-site.cdn.example.net	T	-	h2	T	-	-	-	-	-	-	
+1531687190.02632	CuMGVfUkGoFTcia6g	10.0.0.2	37590	10.2.4.3	443	-	-	-	random.domain.com	F	-	-	F	-	-	-	-	-	-	
+1531687185.2183	CLPKPi2rWL4e1J8mN7	fe80:541:4303:db20:5d47:492b:981b:6bc3	51434	fe80:f6b0:a0b4:84a::10b6	443	TLSv12	TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256	-	i.ytimg.com	F	-	h2	F	-	-	-	-	-	-	
+#close	2018-07-15-16-40-00																			

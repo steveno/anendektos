@@ -67,12 +67,9 @@ class Parser {
             } else if (header.path == "files") {
                 auto files = new Files();
                 files.parse_file(header, file);
-            } else if (header.path == "packet_filter") {
-                writeln("ERROR: NOT IMPLEMENTED");
-            } else if (header.path == "reporter") {
-                writeln("ERROR: NOT IMPLEMENTED");
             } else if (header.path == "ssl") {
-                writeln("ERROR: NOT IMPLEMENTED");
+                auto ssl = new Ssl();
+                ssl.parse_file(header, file);
             } else if (header.path == "x509") {
                 writeln("ERROR: NOT IMPLEMENTED");
             }
