@@ -76,7 +76,6 @@ class Dns : Parser {
             cur_record.rcode = to!int(line[14]);
             cur_record.rcode_name = line[15];
 
-            // Convert 0 and 1 to bool
             if (line[16] != header.unset_field) {
                 if (line[16] == "F") {
                     cur_record.AA = false;
