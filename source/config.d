@@ -13,25 +13,23 @@ import dini;
 class Config
 {
     public Ini ini;
-    
-    private string config_path;
+
     private static bool instantiated_;
     private __gshared Config instance_;
 
     private this(string path) {
-        this.config_path = path;
-        parse();
+        try {
+            this.ini = Ini.Parse(path);
+        } catch (FileException e) {
+            throw new Exception("Error reading configuration file: %s", e.msg);
+        }
     }
 
-    static Config get(string path)
-    {
-        if (!instantiated_)
-        {
-            synchronized(Config.classinfo)
-            {
-                if (!instance_)
-                {
-                    instance_ = new Config(path);
+    static Config get() {
+        if (!instantiated_) {
+            synchronized(Config.classinfo) {
+                if (!instance_) {
+                    throw new Exception("Attempted to pull configuration without file path");
                 }
 
                 instantiated_ = true;
@@ -41,14 +39,17 @@ class Config
         return instance_;
     }
 
-    private int parse() {
-        // Try and find the config file
-        try {
-            this.ini = Ini.Parse(this.config_path);
-            return 0;
-        } catch (FileException e) {
-            stderr.writefln("Error reading configuration file: %s", e.msg);
-            return 1;
-        } 
+    static Config get(string path) {
+        if (!instantiated_) {
+            synchronized(Config.classinfo) {
+                if (!instance_) {
+                    instance_ = new Config(path);
+                }
+
+                instantiated_ = true;
+            }
+        }
+
+        return instance_;
     }
 }

@@ -6,13 +6,11 @@ module parser;
 
 import std.conv;
 import std.file;
-import std.parallelism;
 import std.stdio;
 import std.string;
 
-import dlogg.log;
-import dlogg.strict;
-
+import config;
+import logging;
 import parsers.conn;
 import parsers.dns;
 import parsers.files;
@@ -34,45 +32,38 @@ class Parser {
         string[] fields;
     };
 
-    this() {
-    }
+    public void parse_logs(string bro_path, string out_path) {
+        config.Config options = config.Config.get();
+        log = logging.Log(stderrLogger, stdoutLogger(LogLevel.Info), fileLogger(options.ini["application"].getKey("log_file")));
 
-    this(string bro_path, string out_path) {
-        this.bro_path = bro_path;
-        this.out_path = out_path;
-    }
-
-    public void parse_logs() {
-        auto log_files = dirEntries(this.bro_path, SpanMode.shallow);
+        auto log_files = dirEntries(bro_path, SpanMode.shallow);
         File file;
         Header header;
 
-        foreach (d; parallel(log_files, 1)) {
-            string log_file;
-            if (!d.name.endsWith(this.log_suffix))
-                continue;
-            else
-                log_file = d.name.stripRight(this.log_suffix);
-
-            file = File(log_file, "r");
+        foreach (d; log_files) {
+            file = File(d.name, "r");
             header = parse_log_header(file);
-            if (header.path == "conn") {
-                auto conn = new Conn();
-                conn.parse_file(header, file);
-            } else if (header.path == "dns") {
-                auto dns = new Dns();
-                dns.parse_file(header, file);
-            } else if (header.path == "http") {
-                auto http = new Http();
-                http.parse_file(header, file);
-            } else if (header.path == "files") {
-                auto files = new Files();
-                files.parse_file(header, file);
-            } else if (header.path == "ssl") {
-                auto ssl = new Ssl();
-                ssl.parse_file(header, file);
-            } else if (header.path == "x509") {
-                writeln("ERROR: NOT IMPLEMENTED");
+            try {
+                if (header.path == "conn") {
+                    auto conn = new Conn();
+                    conn.parse_file(header, file);
+                } else if (header.path == "dns") {
+                    auto dns = new Dns();
+                    dns.parse_file(header, file);
+                } else if (header.path == "http") {
+                    auto http = new Http();
+                    http.parse_file(header, file);
+                } else if (header.path == "files") {
+                    auto files = new Files();
+                    files.parse_file(header, file);
+                } else if (header.path == "ssl") {
+                    auto ssl = new Ssl();
+                    ssl.parse_file(header, file);
+                } else {
+                    log.warn("%s has not been implemented", header.path);
+                }
+            } catch (Exception e) {
+                log.error("%s - %s", d.name, e.msg);
             }
         }
     }

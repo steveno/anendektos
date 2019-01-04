@@ -24,11 +24,13 @@ class Arguments {
 
             if (args[i] == "--help" || args[i] == "-h") {
                 print_help();
+                ret_msg = "0";
                 break;
             }
 
             if (args[i] == "--version" || args[i] == "-v") {
                 print_version();
+                ret_msg = "0";
                 break;
             }
 
@@ -69,6 +71,9 @@ class Arguments {
             print_help();
             break;
         }
+
+        if (config_path == "" && ret_msg != "0")
+            throw new Exception("A configuration file must be passed in");
 
         return ret_msg;
     }
@@ -136,25 +141,21 @@ version(unittest) {
     unittest
     {
         auto args = new Arguments();
-        args.parse_arguments(["./test", "bro_path", "/home/user/bro"]);
-        args.bro_path.should == "/home/user/bro";
+        args.parse_arguments(["./test", "bro_path", "/home/user/bro"]).shouldThrow!Exception;
     }
 
     @("arguments_out_path")
     unittest
     {
         auto args = new Arguments();
-        args.parse_arguments(["./test", "out_path", "/home/user/out"]);
-        args.out_path.should == "/home/user/out";
+        args.parse_arguments(["./test", "out_path", "/home/user/out"]).shouldThrow!Exception;
     }
 
     @("arguments_bro_out_path")
     unittest
     {
         auto args = new Arguments();
-        args.parse_arguments(["./test", "bro_path", "/home/user/bro", "out_path", "/home/user/out"]);
-        args.out_path.should == "/home/user/out";
-        args.bro_path.should == "/home/user/bro";
+        args.parse_arguments(["./test", "bro_path", "/home/user/bro", "out_path", "/home/user/out"]).shouldThrow!Exception;
     }
 
     @("arguments_bro_out_config_path")
