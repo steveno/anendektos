@@ -65,22 +65,22 @@ class Http : Parser {
             cur_record.orig_h = parseAddress(line[2]);
             cur_record.orig_p = to!int(line[3]);
             cur_record.resp_h = parseAddress(line[4]);
-            cur_record.resp_p = to!int(line[5]); 
+            cur_record.resp_p = to!int(line[5]);
             cur_record.trans_depth = to!int(line[6]);
             cur_record.method = line[7];
             cur_record.host = line[8];
             cur_record.uri = line[9];
-            
+
             if (line[10] != header.unset_field)
                 cur_record.referrer = line[10];
-            
+
             cur_record.http_version = line[11];
             cur_record.user_agent = line[12];
             cur_record.request_body_len = to!int(line[13]);
             cur_record.response_body_len = to!int(line[14]);
             cur_record.status_code = to!int(line[15]);
             cur_record.status_msg = line[16];
-            
+
             if (line[17] != header.unset_field)
                 cur_record.info_code = to!int(line[17]);
 
@@ -162,7 +162,7 @@ version(unittest) {
     Parser.Header header;
     Http.Record[int] results;
 
-    @Setup 
+    @Setup
     void before() {
         File file = File("tests/logs/http.log", "r");
         auto parser = new Parser();
@@ -189,7 +189,7 @@ version(unittest) {
 
     @("http_read_test_1")
     unittest
-    { 
+    {
         results[1].ts.should == 1531687185.306279;
         results[1].uid.should == "CuVIzg2991yFw6ZZl";
         results[1].orig_h.toAddrString().should == "10.0.0.3";
@@ -223,7 +223,7 @@ version(unittest) {
 
     @("http_read_test_2")
     unittest
-    { 
+    {
         results[2].ts.should == 1531687185.314280;
         results[2].uid.should == "CBlWr94sL2KePoCqz7";
         results[2].orig_h.toAddrString().should == "10.0.0.3";
@@ -257,7 +257,7 @@ version(unittest) {
 
     @("http_read_test_3")
     unittest
-    { 
+    {
         results[3].ts.should == 1531687191.158275;
         results[3].uid.should == "Czi9O3kaUI8DpgVCd";
         results[3].orig_h.toAddrString().should == "10.0.0.2";

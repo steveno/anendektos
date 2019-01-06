@@ -114,7 +114,7 @@ version(unittest) {
     Parser.Header header;
     Conn.Record[int] results;
 
-    @Setup 
+    @Setup
     void before() {
         File file = File("tests/logs/conn.log", "r");
         auto parser = new Parser();

@@ -91,7 +91,7 @@ Positional arguments:
  bro_path       Path to bro logs to parse
  out_path       Path to output analysis to
  config_path    Path to configuration file
-        
+
 Named arguments
  --help, -h     Print this help message
  --version, -v  Print version information";

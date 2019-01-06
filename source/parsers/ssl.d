@@ -68,7 +68,7 @@ class Ssl : Parser {
                 cur_record.curve = line[8];
 
             cur_record.server_name = line[9];
-  
+
             if (line[10] != header.unset_field) {
                 if (line[10] == "F") {
                     cur_record.resumed = false;
@@ -124,7 +124,7 @@ version(unittest) {
     Parser.Header header;
     Ssl.Record[int] results;
 
-    @Setup 
+    @Setup
     void before() {
         File file = File("tests/logs/ssl.log", "r");
         auto parser = new Parser();
@@ -151,7 +151,7 @@ version(unittest) {
 
     @("ssl_read_test_1")
     unittest
-    { 
+    {
         results[1].ts.should == 1531687175.6463;
         results[1].uid.should == "C49NlPigbiwRa1aJ3";
         results[1].orig_h.toAddrString().should == "10.0.0.2";
@@ -176,7 +176,7 @@ version(unittest) {
 
     @("ssl_read_test_2")
     unittest
-    { 
+    {
         results[2].ts.should == 1531687177.91832;
         results[2].uid.should == "C4nlzv2oCPsTUEf7bb";
         results[2].orig_h.toAddrString().should == "10.0.0.2";
@@ -201,7 +201,7 @@ version(unittest) {
 
     @("ssl_read_test_3")
     unittest
-    { 
+    {
         results[3].ts.should == 1531687190.02632;
         results[3].uid.should == "CuMGVfUkGoFTcia6g";
         results[3].orig_h.toAddrString().should == "10.0.0.2";
@@ -226,7 +226,7 @@ version(unittest) {
 
     @("ssl_read_test_4")
     unittest
-    { 
+    {
         results[4].ts.should == 1531687185.2183;
         results[4].uid.should == "CLPKPi2rWL4e1J8mN7";
         results[4].orig_h.toAddrString().should == "fe80:541:4303:db20:5d47:492b:981b:6bc3";
