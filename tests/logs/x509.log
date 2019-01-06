@@ -1,0 +1,12 @@
+#separator \x09																				
+#set_separator	,																			
+#empty_field	(empty)																			
+#unset_field	-																			
+#path	x509																			
+#open	2018-07-15-16-39-35																			
+#fields	ts	id	certificate.version	certificate.serial	certificate.subject	certificate.issuer	certificate.not_valid_before	certificate.not_valid_after	certificate.key_alg	certificate.sig_alg	certificate.key_type	certificate.key_length	certificate.exponent	certificate.curve	san.dns	san.uri	san.email	san.ip	basic_constraints.ca	basic_constraints.path_len
+#types	time	string	count	string	string	string	time	time	string	string	string	count	string	string	vector[string]	vector[string]	vector[string]	vector[addr]	bool	count
+1531687177.67832	FVz825C4jlDdo6b14	3	4B32DE72CAA28369	CN=*.companynameapis.com,O=CompanyName LLC,L=Home Town,ST=California,C=US	CN=CompanyName Internet Authority G3,O=CompanyName Trust Services,C=US	1529422416	1535470260	id-ecPublicKey	sha256WithRSAEncryption	ecdsa	256	-	prime256v1	*.companynameapis.com,*.clients6.companyname.com,*.cloudendpointsapis.com,cloudendpointsapis.com,companynameapis.com	-	-	-	F	-	
+1531687177.67832	F8ZbvG3ftnyrB5Ezui	3	01E3A9301CFC7206383F9A531D	CN=CompanyName Internet Authority G3,O=CompanyName Trust Services,C=US	CN=GlobalSign,O=GlobalSign,OU=GlobalSign Root CA - R2	1497499242	1639544442	rsaEncryption	sha256WithRSAEncryption	rsa	2048	65537	-	-	-	-	-	T	0	
+1531687178.26231	FmuFdY1BDVQ6VxTWNb	3	0A0630427F5BBCED6957396593B6451F	CN=testcompany.com,O=TestCompany\\, Inc.,L=San Francisco,ST=California,C=US,serialNumber=12344657,jurisdictionST=Delaware,jurisdictionC=US,businessCategory=Private Organization	CN=DigiCert SHA2 Extended Validation Server CA,OU=www.digicert.com,O=DigiCert Inc,C=US	1525752000	1591200000	rsaEncryption	sha256WithRSAEncryption	rsa	2048	65537	-	testcompany.com,www.testcompany.com	-	-	-	F	-	
+#close	2018-07-15-16-40-00																			

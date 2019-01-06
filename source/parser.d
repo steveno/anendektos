@@ -16,6 +16,7 @@ import parsers.dns;
 import parsers.files;
 import parsers.http;
 import parsers.ssl;
+import parsers.x509;
 
 
 class Parser {
@@ -59,6 +60,9 @@ class Parser {
                 } else if (header.path == "ssl") {
                     auto ssl = new Ssl();
                     ssl.parse_file(header, file);
+                } else if (header.path == "x509") {
+                    auto x509 = new X509();
+                    x509.parse_file(header, file);
                 } else {
                     log.warn("%s has not been implemented", header.path);
                 }
