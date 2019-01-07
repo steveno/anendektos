@@ -5,6 +5,7 @@
 module parser;
 
 import std.conv;
+import std.datetime;
 import std.file;
 import std.stdio;
 import std.string;
@@ -20,6 +21,7 @@ class Parser {
         string set_seperator;
         string empty_field;
         string unset_field;
+        DateTime open;
         string path;
         string[] fields;
     };
@@ -113,6 +115,17 @@ class Parser {
                 continue;
             }
 
+            if (startsWith(line, "#open")) {
+                int year = to!int(split(split(line, header.seperator)[1], "-")[0]);
+                int month = to!int(split(split(line, header.seperator)[1], "-")[1]);
+                int day = to!int(split(split(line, header.seperator)[1], "-")[2]);
+                int hour = to!int(split(split(line, header.seperator)[1], "-")[3]);
+                int minute = to!int(split(split(line, header.seperator)[1], "-")[4]);
+                int second = to!int(split(split(line, header.seperator)[1], "-")[5]);
+                header.open = DateTime(year, month, day, hour, minute, second);
+                continue;
+            }
+
             if (startsWith(line, "#fields")) {
                 header.fields = split(line, header.seperator)[1..$];
                 continue;
@@ -156,6 +169,7 @@ version(unittest) {
         header.empty_field.should == "(empty)";
         header.unset_field.should == "-";
         header.path.should == "conn";
+        header.open.toISOString().should == "20180715T163941";
         header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes", "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
     }
 
@@ -172,6 +186,7 @@ version(unittest) {
         header.empty_field.should == "(empty)";
         header.unset_field.should == "-";
         header.path.should == "conn";
+        header.open.toISOString().should == "20180724T131650";
         header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes", "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
     }
 
