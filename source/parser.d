@@ -20,8 +20,6 @@ import parsers.x509;
 
 
 class Parser {
-    private string bro_path;
-    private string out_path;
     private immutable string log_suffix = ".log";
 
     struct Header {
@@ -33,11 +31,11 @@ class Parser {
         string[] fields;
     };
 
-    public void parse_logs(string bro_path, string out_path) {
+    public void parse_logs() {
         config.Config options = config.Config.get();
         log = logging.Log(stderrLogger, stdoutLogger(LogLevel.Info), fileLogger(options.ini["application"].getKey("log_file")));
 
-        auto log_files = dirEntries(bro_path, SpanMode.shallow);
+        auto log_files = dirEntries(options.ini["application"].getKey("bro_path"), SpanMode.shallow);
         File file;
         Header header;
 
