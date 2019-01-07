@@ -11,13 +11,6 @@ import std.string;
 
 import config;
 import logging;
-import parsers.conn;
-import parsers.dns;
-import parsers.files;
-import parsers.http;
-import parsers.ssl;
-import parsers.x509;
-
 
 class Parser {
     private immutable string log_suffix = ".log";
@@ -44,21 +37,27 @@ class Parser {
             header = parse_log_header(file);
             try {
                 if (header.path == "conn") {
+                    import parsers.conn;
                     auto conn = new Conn();
                     conn.parse_file(header, file);
                 } else if (header.path == "dns") {
+                    import parsers.dns;
                     auto dns = new Dns();
                     dns.parse_file(header, file);
                 } else if (header.path == "http") {
+                    import parsers.http;
                     auto http = new Http();
                     http.parse_file(header, file);
                 } else if (header.path == "files") {
+                    import parsers.files;
                     auto files = new Files();
                     files.parse_file(header, file);
                 } else if (header.path == "ssl") {
+                    import parsers.ssl;
                     auto ssl = new Ssl();
                     ssl.parse_file(header, file);
                 } else if (header.path == "x509") {
+                    import parsers.x509;
                     auto x509 = new X509();
                     x509.parse_file(header, file);
                 } else {
