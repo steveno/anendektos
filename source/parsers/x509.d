@@ -156,8 +156,8 @@ version(unittest) {
         results[1].certificate_serial.should == "4B32DE72CAA28369";
         results[1].certificate_subject.should == "CN=*.companynameapis.com,O=CompanyName LLC,L=Home Town,ST=California,C=US";
         results[1].certificate_issuer.should == "CN=CompanyName Internet Authority G3,O=CompanyName Trust Services,C=US";
-        results[1].certificate_not_valid_before.should == 1529422416;
-        results[1].certificate_not_valid_after.should == 1535470260;
+        results[1].certificate_not_valid_before.should == 1529422416.000000;
+        results[1].certificate_not_valid_after.should == 1535470260.000000;
         results[1].certificate_key_alg.should == "id-ecPublicKey";
         results[1].certificate_sig_alg.should == "sha256WithRSAEncryption";
         results[1].certificate_key_type.should == "ecdsa";
@@ -181,8 +181,8 @@ version(unittest) {
         results[2].certificate_serial.should == "01E3A9301CFC7206383F9A531D";
         results[2].certificate_subject.should == "CN=CompanyName Internet Authority G3,O=CompanyName Trust Services,C=US";
         results[2].certificate_issuer.should == "CN=GlobalSign,O=GlobalSign,OU=GlobalSign Root CA - R2";
-        results[2].certificate_not_valid_before.should == 1497499242;
-        results[2].certificate_not_valid_after.should == 1639544442;
+        results[2].certificate_not_valid_before.should == 1497499242.000000;
+        results[2].certificate_not_valid_after.should == 1639544442.000000;
         results[2].certificate_key_alg.should == "rsaEncryption";
         results[2].certificate_sig_alg.should == "sha256WithRSAEncryption";
         results[2].certificate_key_type.should == "rsa";
@@ -206,8 +206,8 @@ version(unittest) {
         results[3].certificate_serial.should == "0A0630427F5BBCED6957396593B6451F";
         results[3].certificate_subject.should == "CN=testcompany.com,O=TestCompany\\\\, Inc.,L=San Francisco,ST=California,C=US,serialNumber=12344657,jurisdictionST=Delaware,jurisdictionC=US,businessCategory=Private Organization";
         results[3].certificate_issuer.should == "CN=DigiCert SHA2 Extended Validation Server CA,OU=www.digicert.com,O=DigiCert Inc,C=US";
-        results[3].certificate_not_valid_before.should == 1525752000;
-        results[3].certificate_not_valid_after.should == 1591200000;
+        results[3].certificate_not_valid_before.should == 1525752000.000000;
+        results[3].certificate_not_valid_after.should == 1591200000.000000;
         results[3].certificate_key_alg.should == "rsaEncryption";
         results[3].certificate_sig_alg.should == "sha256WithRSAEncryption";
         results[3].certificate_key_type.should == "rsa";
