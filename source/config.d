@@ -29,7 +29,12 @@ class Config
         if (!instantiated_) {
             synchronized(Config.classinfo) {
                 if (!instance_) {
-                    throw new Exception("Attempted to pull configuration without file path");
+                    // Default to the current directory
+                    try {
+                        instance_ = new Config("anendektos.ini");
+                    } catch (FileException e) {
+                        throw new Exception("Attempted to pull configuration without file path");
+                    }
                 }
 
                 instantiated_ = true;

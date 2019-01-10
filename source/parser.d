@@ -15,6 +15,8 @@ import logging;
 
 class Parser {
     private immutable string log_suffix = ".log";
+    private config.Config options;
+    private logging.Log log;
 
     struct Header {
         string seperator;
@@ -26,11 +28,13 @@ class Parser {
         string[] fields;
     };
 
-    public void parse_logs() {
-        config.Config options = config.Config.get();
-        log = logging.Log(stderrLogger, stdoutLogger(LogLevel.Info), fileLogger(options.ini["application"].getKey("log_file")));
+    this() {
+        this.options = config.Config.get();
+        this.log = logging.Log(stderrLogger, stdoutLogger(LogLevel.Info), fileLogger(options.ini["application"].getKey("log_file")));
+    }
 
-        auto log_files = dirEntries(options.ini["application"].getKey("bro_path"), SpanMode.shallow);
+    public void parse_logs() {
+        auto log_files = dirEntries(this.options.ini["application"].getKey("bro_path"), SpanMode.shallow);
         File file;
         Header header;
 
@@ -41,32 +45,32 @@ class Parser {
                 if (header.path == "conn") {
                     import parsers.conn;
                     auto conn = new Conn();
-                    conn.parse_file(header, file);
+                    summarize(conn, header, file);
                 } else if (header.path == "dns") {
                     import parsers.dns;
                     auto dns = new Dns();
-                    dns.parse_file(header, file);
+                    summarize(dns, header, file);
                 } else if (header.path == "http") {
                     import parsers.http;
                     auto http = new Http();
-                    http.parse_file(header, file);
+                    summarize(http, header, file);
                 } else if (header.path == "files") {
                     import parsers.files;
                     auto files = new Files();
-                    files.parse_file(header, file);
+                    summarize(files, header, file);
                 } else if (header.path == "ssl") {
                     import parsers.ssl;
                     auto ssl = new Ssl();
-                    ssl.parse_file(header, file);
+                    summarize(ssl, header, file);
                 } else if (header.path == "x509") {
                     import parsers.x509;
                     auto x509 = new X509();
-                    x509.parse_file(header, file);
+                    summarize(x509, header, file);
                 } else {
-                    log.warn("%s has not been implemented", header.path);
+                    this.log.warn("%s has not been implemented", header.path);
                 }
             } catch (Exception e) {
-                log.error("%s - %s", d.name, e.msg);
+                this.log.error("%s - %s", d.name, e.msg);
             }
         }
     }
@@ -149,6 +153,29 @@ class Parser {
         }
 
         return to!string(cast(char)to!int(result, 16));
+    }
+
+    public void summarize(P, H, F)(P parser_type, H header, F file) {
+        parser_type.Record[int] res;
+        auto gen = parser_type.parse_file(header, file);
+        auto i = 0;
+        while (!gen.empty()) {
+            parser_type.Record record = gen.front();
+            res[i] = record;
+            gen.popFront();
+            i++;
+        }
+
+        /* TODO Summarize records
+        import std.container.rbtree;
+        import std.typecons;
+
+        auto value = tuple([1, 3], "t");
+        auto rbt = redBlackTree(value);
+        rbt.insert(tuple([1, 3], "b"));
+        rbt.insert(tuple([1, 3], "b"));
+        rbt.insert(tuple([2, 2], "p"));
+        */
     }
 }
 

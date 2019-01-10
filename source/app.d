@@ -9,8 +9,8 @@ import config;
 import parser;
 
 
-version(unittest) {}
-else {
+version(unittest) {
+} else {
     int main(string[] args)
     {
         // We require at least one argument

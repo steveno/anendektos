@@ -4,6 +4,7 @@
 
 module parsers.http;
 
+import std.concurrency: Generator, yield;
 import std.conv;
 import std.socket;
 import std.stdio;
@@ -46,113 +47,109 @@ class Http : Parser {
         string[] resp_mime_types;
     };
 
-    public Record[int] parse_file(Header header, File log_file) {
-        Record[int] contents;
-        int rec_num = 0;
-        string[] line;
+    public auto parse_file(Header header, File log_file) {
+        auto range = log_file.byLine();
+        return new Generator!(Record)({
+            foreach (line; range) {
+                string[] cur_line = strip(to!string(line)).split(header.seperator);
 
-        while (!log_file.eof()) {
-            line = strip(log_file.readln()).split(header.seperator);
+                // Skip empty lines
+                if (line == [] || startsWith(cur_line[0], "#"))
+                    continue;
 
-            // Skip empty lines
-            if (line == [] || startsWith(line[0], "#"))
-                continue;
+                // Populate our record
+                Record cur_record;
+                cur_record.ts = to!double(cur_line[0]);
+                cur_record.uid = cur_line[1];
+                cur_record.orig_h = parseAddress(cur_line[2]);
+                cur_record.orig_p = to!int(cur_line[3]);
+                cur_record.resp_h = parseAddress(cur_line[4]);
+                cur_record.resp_p = to!int(cur_line[5]);
+                cur_record.trans_depth = to!int(cur_line[6]);
+                cur_record.method = cur_line[7];
+                cur_record.host = cur_line[8];
+                cur_record.uri = cur_line[9];
 
-            // Populate our record
-            Record cur_record;
-            cur_record.ts = to!double(line[0]);
-            cur_record.uid = line[1];
-            cur_record.orig_h = parseAddress(line[2]);
-            cur_record.orig_p = to!int(line[3]);
-            cur_record.resp_h = parseAddress(line[4]);
-            cur_record.resp_p = to!int(line[5]);
-            cur_record.trans_depth = to!int(line[6]);
-            cur_record.method = line[7];
-            cur_record.host = line[8];
-            cur_record.uri = line[9];
+                if (cur_line[10] != header.unset_field)
+                    cur_record.referrer = cur_line[10];
 
-            if (line[10] != header.unset_field)
-                cur_record.referrer = line[10];
+                cur_record.http_version = cur_line[11];
+                cur_record.user_agent = cur_line[12];
+                cur_record.request_body_len = to!int(cur_line[13]);
+                cur_record.response_body_len = to!int(cur_line[14]);
+                cur_record.status_code = to!int(cur_line[15]);
+                cur_record.status_msg = cur_line[16];
 
-            cur_record.http_version = line[11];
-            cur_record.user_agent = line[12];
-            cur_record.request_body_len = to!int(line[13]);
-            cur_record.response_body_len = to!int(line[14]);
-            cur_record.status_code = to!int(line[15]);
-            cur_record.status_msg = line[16];
+                if (cur_line[17] != header.unset_field)
+                    cur_record.info_code = to!int(cur_line[17]);
 
-            if (line[17] != header.unset_field)
-                cur_record.info_code = to!int(line[17]);
+                if (cur_line[18] != header.unset_field)
+                    cur_record.info_msg = cur_line[18];
 
-            if (line[18] != header.unset_field)
-                cur_record.info_msg = line[18];
-
-            if (line[19] != header.empty_field) {
-                cur_record.tags.length = line[19].split(header.set_seperator).length;
-                foreach (i; 0 .. line[19].split(header.set_seperator).length) {
-                    cur_record.tags[i] = line[19].split(header.set_seperator)[i];
+                if (cur_line[19] != header.empty_field) {
+                    cur_record.tags.length = cur_line[19].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[19].split(header.set_seperator).length) {
+                        cur_record.tags[i] = cur_line[19].split(header.set_seperator)[i];
+                    }
                 }
-            }
 
-            if (line[20] != header.unset_field)
-                cur_record.username = line[20];
+                if (cur_line[20] != header.unset_field)
+                    cur_record.username = cur_line[20];
 
-            if (line[21] != header.unset_field)
-                cur_record.password = line[21];
+                if (cur_line[21] != header.unset_field)
+                    cur_record.password = cur_line[21];
 
-            if (line[22] != header.unset_field) {
-                cur_record.proxied.length = line[22].split(header.set_seperator).length;
-                foreach (i; 0 .. line[22].split(header.set_seperator).length) {
-                    cur_record.proxied [i] = line[22].split(header.set_seperator)[i];
+                if (cur_line[22] != header.unset_field) {
+                    cur_record.proxied.length = cur_line[22].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[22].split(header.set_seperator).length) {
+                        cur_record.proxied [i] = cur_line[22].split(header.set_seperator)[i];
+                    }
                 }
-            }
 
-            if (line[23] != header.unset_field) {
-                cur_record.orig_fuids.length = line[23].split(header.set_seperator).length;
-                foreach (i; 0 .. line[23].split(header.set_seperator).length) {
-                    cur_record.orig_fuids [i] = line[23].split(header.set_seperator)[i];
+                if (cur_line[23] != header.unset_field) {
+                    cur_record.orig_fuids.length = cur_line[23].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[23].split(header.set_seperator).length) {
+                        cur_record.orig_fuids [i] = cur_line[23].split(header.set_seperator)[i];
+                    }
                 }
-            }
 
-            if (line[24] != header.unset_field) {
-                cur_record.orig_filenames.length = line[24].split(header.set_seperator).length;
-                foreach (i; 0 .. line[24].split(header.set_seperator).length) {
-                    cur_record.orig_filenames [i] = line[24].split(header.set_seperator)[i];
+                if (cur_line[24] != header.unset_field) {
+                    cur_record.orig_filenames.length = cur_line[24].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[24].split(header.set_seperator).length) {
+                        cur_record.orig_filenames [i] = cur_line[24].split(header.set_seperator)[i];
+                    }
                 }
-            }
 
-            if (line[25] != header.unset_field) {
-                cur_record.orig_mime_types.length = line[25].split(header.set_seperator).length;
-                foreach (i; 0 .. line[25].split(header.set_seperator).length) {
-                    cur_record.orig_mime_types [i] = line[25].split(header.set_seperator)[i];
+                if (cur_line[25] != header.unset_field) {
+                    cur_record.orig_mime_types.length = cur_line[25].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[25].split(header.set_seperator).length) {
+                        cur_record.orig_mime_types [i] = cur_line[25].split(header.set_seperator)[i];
+                    }
                 }
-            }
 
-            if (line[26] != header.unset_field) {
-                cur_record.resp_fuids.length = line[26].split(header.set_seperator).length;
-                foreach (i; 0 .. line[26].split(header.set_seperator).length) {
-                    cur_record.resp_fuids[i] = line[26].split(header.set_seperator)[i];
+                if (cur_line[26] != header.unset_field) {
+                    cur_record.resp_fuids.length = cur_line[26].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[26].split(header.set_seperator).length) {
+                        cur_record.resp_fuids[i] = cur_line[26].split(header.set_seperator)[i];
+                    }
                 }
-            }
-            if (line[27] != header.unset_field) {
-                cur_record.resp_filenames.length = line[27].split(header.set_seperator).length;
-                foreach (i; 0 .. line[27].split(header.set_seperator).length) {
-                    cur_record.resp_filenames[i] = line[27].split(header.set_seperator)[i];
+                if (cur_line[27] != header.unset_field) {
+                    cur_record.resp_filenames.length = cur_line[27].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[27].split(header.set_seperator).length) {
+                        cur_record.resp_filenames[i] = cur_line[27].split(header.set_seperator)[i];
+                    }
                 }
-            }
 
-            if (line[28] != header.unset_field) {
-                cur_record.resp_mime_types.length = line[28].split(header.set_seperator).length;
-                foreach (i; 0 .. line[28].split(header.set_seperator).length) {
-                    cur_record.resp_mime_types[i] = line[28].split(header.set_seperator)[i];
+                if (cur_line[28] != header.unset_field) {
+                    cur_record.resp_mime_types.length = cur_line[28].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[28].split(header.set_seperator).length) {
+                        cur_record.resp_mime_types[i] = cur_line[28].split(header.set_seperator)[i];
+                    }
                 }
+
+                yield(cur_record);
             }
-
-            ++rec_num;
-            contents[rec_num] = cur_record;
-        }
-
-        return contents;
+        });
     }
 }
 
@@ -168,7 +165,15 @@ version(unittest) {
         auto parser = new Parser();
         header = parser.parse_log_header(file);
         auto http_test = new Http;
-        results = http_test.parse_file(header, file);
+
+        auto gen = http_test.parse_file(header, file);
+        auto i = 0;
+        while (!gen.empty()) {
+            Http.Record record = gen.front();
+            results[i] = record;
+            gen.popFront();
+            i++;
+        }
     }
 
     @("http_read_header")
@@ -190,102 +195,126 @@ version(unittest) {
     @("http_read_test_1")
     unittest
     {
-        results[1].ts.should == 1531687185.306279;
-        results[1].uid.should == "CuVIzg2991yFw6ZZl";
-        results[1].orig_h.toAddrString().should == "10.0.0.3";
-        results[1].orig_p.should == 45548;
-        results[1].resp_h.toAddrString().should == "127.0.0.2";
-        results[1].resp_p.should == 80;
-        results[1].trans_depth.should == 1;
-        results[1].method.should == "POST";
-        results[1].host.should == "test.domain";
-        results[1].uri.should == "/GTSGIAG3";
-        assert(results[1].referrer.isNull);
-        results[1].http_version.should == "1.1";
-        results[1].user_agent.should == "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
-        results[1].request_body_len.should == 75;
-        results[1].response_body_len.should == 463;
-        results[1].status_code.should == 200;
-        results[1].status_msg.should == "OK";
-        assert(results[1].info_code.isNull);
-        assert(results[1].info_msg.isNull);
-        results[1].tags.shouldBeEmpty;
-        assert(results[1].username.isNull);
-        assert(results[1].password.isNull);
-        results[1].proxied.shouldBeEmpty;
-        results[1].orig_fuids.should == ["FFRgqxygVeipwAvKl"];
-        results[1].orig_filenames.shouldBeEmpty;
-        results[1].orig_mime_types.should == ["application/ocsp-request"];
-        results[1].resp_fuids.should == ["Fae9Lt3uIEEOVtrGre"];
-        results[1].resp_filenames.shouldBeEmpty();
-        results[1].resp_mime_types.should == ["application/ocsp-response"];
+        int entry = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i].uid == "CuVIzg2991yFw6ZZl")
+                entry = i;
+        }
+
+        if (entry == -1)
+            throw new Exception("Record not found");
+
+        results[entry].ts.should == 1531687185.306279;
+        results[entry].orig_h.toAddrString().should == "10.0.0.3";
+        results[entry].orig_p.should == 45548;
+        results[entry].resp_h.toAddrString().should == "127.0.0.2";
+        results[entry].resp_p.should == 80;
+        results[entry].trans_depth.should == 1;
+        results[entry].method.should == "POST";
+        results[entry].host.should == "test.domain";
+        results[entry].uri.should == "/GTSGIAG3";
+        assert(results[entry].referrer.isNull);
+        results[entry].http_version.should == "1.1";
+        results[entry].user_agent.should == "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
+        results[entry].request_body_len.should == 75;
+        results[entry].response_body_len.should == 463;
+        results[entry].status_code.should == 200;
+        results[entry].status_msg.should == "OK";
+        assert(results[entry].info_code.isNull);
+        assert(results[entry].info_msg.isNull);
+        results[entry].tags.shouldBeEmpty;
+        assert(results[entry].username.isNull);
+        assert(results[entry].password.isNull);
+        results[entry].proxied.shouldBeEmpty;
+        results[entry].orig_fuids.should == ["FFRgqxygVeipwAvKl"];
+        results[entry].orig_filenames.shouldBeEmpty;
+        results[entry].orig_mime_types.should == ["application/ocsp-request"];
+        results[entry].resp_fuids.should == ["Fae9Lt3uIEEOVtrGre"];
+        results[entry].resp_filenames.shouldBeEmpty();
+        results[entry].resp_mime_types.should == ["application/ocsp-response"];
     }
 
     @("http_read_test_2")
     unittest
     {
-        results[2].ts.should == 1531687185.314280;
-        results[2].uid.should == "CBlWr94sL2KePoCqz7";
-        results[2].orig_h.toAddrString().should == "10.0.0.3";
-        results[2].orig_p.should == 45546;
-        results[2].resp_h.toAddrString().should == "127.0.0.2";
-        results[2].resp_p.should == 80;
-        results[2].trans_depth.should == 1;
-        results[2].method.should == "POST";
-        results[2].host.should == "test.domain";
-        results[2].uri.should == "/GTSGIAG3";
-        assert(results[2].referrer.isNull);
-        results[2].http_version.should == "1.1";
-        results[2].user_agent.should == "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
-        results[2].request_body_len.should == 75;
-        results[2].response_body_len.should == 463;
-        results[2].status_code.should == 200;
-        results[2].status_msg.should == "OK";
-        assert(results[2].info_code.isNull);
-        assert(results[2].info_msg.isNull);
-        results[2].tags.shouldBeEmpty;
-        assert(results[2].username.isNull);
-        assert(results[2].password.isNull);
-        results[2].proxied.shouldBeEmpty();
-        results[2].orig_fuids.should == ["F4MT931ov6qLvRD8Ne"];
-        results[2].orig_filenames.shouldBeEmpty();
-        results[2].orig_mime_types.should == ["application/ocsp-request"];
-        results[2].resp_fuids.should == ["F5F5oA1q4IXwFANwk8"];
-        results[2].resp_filenames.shouldBeEmpty();
-        results[2].resp_mime_types.should == ["application/ocsp-response"];
+        int entry = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i].uid == "CBlWr94sL2KePoCqz7")
+                entry = i;
+        }
+
+        if (entry == -1)
+            throw new Exception("Record not found");
+
+        results[entry].ts.should == 1531687185.314280;
+        results[entry].orig_h.toAddrString().should == "10.0.0.3";
+        results[entry].orig_p.should == 45546;
+        results[entry].resp_h.toAddrString().should == "127.0.0.2";
+        results[entry].resp_p.should == 80;
+        results[entry].trans_depth.should == 1;
+        results[entry].method.should == "POST";
+        results[entry].host.should == "test.domain";
+        results[entry].uri.should == "/GTSGIAG3";
+        assert(results[entry].referrer.isNull);
+        results[entry].http_version.should == "1.1";
+        results[entry].user_agent.should == "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
+        results[entry].request_body_len.should == 75;
+        results[entry].response_body_len.should == 463;
+        results[entry].status_code.should == 200;
+        results[entry].status_msg.should == "OK";
+        assert(results[entry].info_code.isNull);
+        assert(results[entry].info_msg.isNull);
+        results[entry].tags.shouldBeEmpty;
+        assert(results[entry].username.isNull);
+        assert(results[entry].password.isNull);
+        results[entry].proxied.shouldBeEmpty();
+        results[entry].orig_fuids.should == ["F4MT931ov6qLvRD8Ne"];
+        results[entry].orig_filenames.shouldBeEmpty();
+        results[entry].orig_mime_types.should == ["application/ocsp-request"];
+        results[entry].resp_fuids.should == ["F5F5oA1q4IXwFANwk8"];
+        results[entry].resp_filenames.shouldBeEmpty();
+        results[entry].resp_mime_types.should == ["application/ocsp-response"];
     }
 
     @("http_read_test_3")
     unittest
     {
-        results[3].ts.should == 1531687191.158275;
-        results[3].uid.should == "Czi9O3kaUI8DpgVCd";
-        results[3].orig_h.toAddrString().should == "10.0.0.2";
-        results[3].orig_p.should == 43422;
-        results[3].resp_h.toAddrString().should == "10.12.1.2";
-        results[3].resp_p.should == 80;
-        results[3].trans_depth.should == 1;
-        results[3].method.should == "POST";
-        results[3].host.should == "testdomain.com";
-        results[3].uri.should == "/";
-        assert(results[3].referrer.isNull);
-        results[3].http_version.should == "1.1";
-        results[3].user_agent.should == "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
-        results[3].request_body_len.should == 83;
-        results[3].response_body_len.should == 471;
-        results[3].status_code.should == 200;
-        results[3].status_msg.should == "OK";
-        assert(results[3].info_code.isNull);
-        assert(results[3].info_msg.isNull);
-        results[3].tags.shouldBeEmpty;
-        assert(results[3].username.isNull);
-        assert(results[3].password.isNull);
-        results[3].proxied.shouldBeEmpty();
-        results[3].orig_fuids.should == ["FHDk0m2U0SNRGPYN5g"];
-        results[3].orig_filenames.shouldBeEmpty() ;
-        results[3].orig_mime_types.should == ["application/ocsp-request"];
-        results[3].resp_fuids.should == ["F6sICI3IY4vu5U4ys1"];
-        results[3].resp_filenames.shouldBeEmpty();
-        results[3].resp_mime_types.should == ["application/ocsp-response"];
+        int entry = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i].uid == "Czi9O3kaUI8DpgVCd")
+                entry = i;
+        }
+
+        if (entry == -1)
+            throw new Exception("Record not found");
+
+        results[entry].ts.should == 1531687191.158275;
+        results[entry].orig_h.toAddrString().should == "10.0.0.2";
+        results[entry].orig_p.should == 43422;
+        results[entry].resp_h.toAddrString().should == "10.12.1.2";
+        results[entry].resp_p.should == 80;
+        results[entry].trans_depth.should == 1;
+        results[entry].method.should == "POST";
+        results[entry].host.should == "testdomain.com";
+        results[entry].uri.should == "/";
+        assert(results[entry].referrer.isNull);
+        results[entry].http_version.should == "1.1";
+        results[entry].user_agent.should == "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
+        results[entry].request_body_len.should == 83;
+        results[entry].response_body_len.should == 471;
+        results[entry].status_code.should == 200;
+        results[entry].status_msg.should == "OK";
+        assert(results[entry].info_code.isNull);
+        assert(results[entry].info_msg.isNull);
+        results[entry].tags.shouldBeEmpty;
+        assert(results[entry].username.isNull);
+        assert(results[entry].password.isNull);
+        results[entry].proxied.shouldBeEmpty();
+        results[entry].orig_fuids.should == ["FHDk0m2U0SNRGPYN5g"];
+        results[entry].orig_filenames.shouldBeEmpty() ;
+        results[entry].orig_mime_types.should == ["application/ocsp-request"];
+        results[entry].resp_fuids.should == ["F6sICI3IY4vu5U4ys1"];
+        results[entry].resp_filenames.shouldBeEmpty();
+        results[entry].resp_mime_types.should == ["application/ocsp-response"];
     }
 }

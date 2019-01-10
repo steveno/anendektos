@@ -4,6 +4,7 @@
 
 module parsers.files;
 
+import std.concurrency: Generator, yield;
 import std.conv;
 import std.socket;
 import std.stdio;
@@ -42,117 +43,113 @@ class Files : Parser {
         Nullable!(int) extracted_size;
     };
 
-    public Record[int] parse_file(Header header, File log_file) {
-        Record[int] contents;
-        int rec_num = 0;
-        string[] line;
+    public auto parse_file(Header header, File log_file) {
+        auto range = log_file.byLine();
+        return new Generator!(Record)({
+            foreach (line; range) {
+                string[] cur_line = strip(to!string(line)).split(header.seperator);
 
-        while (!log_file.eof()) {
-            line = strip(log_file.readln()).split(header.seperator);
+                // Skip empty lines
+                if (line == [] || startsWith(cur_line[0], "#"))
+                    continue;
 
-            // Skip empty lines
-            if (line == [] || startsWith(line[0], "#"))
-                continue;
+                // Populate our record
+                Record cur_record;
 
-            // Populate our record
-            Record cur_record;
+                cur_record.ts = to!double(cur_line[0]);
+                cur_record.fuid = cur_line[1];
 
-            cur_record.ts = to!double(line[0]);
-            cur_record.fuid = line[1];
-
-            if (line[2] != header.unset_field) {
-                cur_record.tx_hosts.length = line[2].split(header.set_seperator).length;
-                foreach (i; 0 .. line[2].split(header.set_seperator).length) {
-                    cur_record.tx_hosts[i] = parseAddress(line[2].split(header.set_seperator)[i]);
+                if (cur_line[2] != header.unset_field) {
+                    cur_record.tx_hosts.length = cur_line[2].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[2].split(header.set_seperator).length) {
+                        cur_record.tx_hosts[i] = parseAddress(cur_line[2].split(header.set_seperator)[i]);
+                    }
                 }
-            }
 
-            if (line[3] != header.unset_field) {
-                cur_record.rx_hosts.length = line[3].split(header.set_seperator).length;
-                foreach (i; 0 .. line[3].split(header.set_seperator).length) {
-                    cur_record.rx_hosts[i] = parseAddress(line[3].split(header.set_seperator)[i]);
+                if (cur_line[3] != header.unset_field) {
+                    cur_record.rx_hosts.length = cur_line[3].split(header.set_seperator).length;
+                    foreach (i; 0 .. cur_line[3].split(header.set_seperator).length) {
+                        cur_record.rx_hosts[i] = parseAddress(cur_line[3].split(header.set_seperator)[i]);
+                    }
                 }
-            }
 
-            if (line[4] != header.unset_field)
-                cur_record.conn_uids = line[4].split(header.set_seperator);
+                if (cur_line[4] != header.unset_field)
+                    cur_record.conn_uids = cur_line[4].split(header.set_seperator);
 
-            cur_record.source = line[5];
-            cur_record.depth = to!int(line[6]);
+                cur_record.source = cur_line[5];
+                cur_record.depth = to!int(cur_line[6]);
 
-            if (line[7] != header.empty_field)
-                cur_record.analyzers = line[7].split(header.set_seperator);
+                if (cur_line[7] != header.empty_field)
+                    cur_record.analyzers = cur_line[7].split(header.set_seperator);
 
-            cur_record.mime_type = line[8];
+                cur_record.mime_type = cur_line[8];
 
-            if (line[9] != header.unset_field)
-                cur_record.filename = line[9];
+                if (cur_line[9] != header.unset_field)
+                    cur_record.filename = cur_line[9];
 
-            cur_record.duration = to!double(line[10]);
+                cur_record.duration = to!double(cur_line[10]);
 
-            if (line[11] != header.unset_field) {
-                if (line[11] == "F") {
-                    cur_record.local_orig = false;
-                } else {
-                    cur_record.local_orig = true;
+                if (cur_line[11] != header.unset_field) {
+                    if (cur_line[11] == "F") {
+                        cur_record.local_orig = false;
+                    } else {
+                        cur_record.local_orig = true;
+                    }
                 }
-            }
 
-            if (line[12] != header.unset_field) {
-                if (line[12] == "F") {
-                    cur_record.is_orig = false;
-                } else {
-                    cur_record.is_orig = true;
+                if (cur_line[12] != header.unset_field) {
+                    if (cur_line[12] == "F") {
+                        cur_record.is_orig = false;
+                    } else {
+                        cur_record.is_orig = true;
+                    }
                 }
-            }
 
-            cur_record.seen_bytes = to!int(line[13]);
+                cur_record.seen_bytes = to!int(cur_line[13]);
 
-            if (line[14] != header.unset_field)
-                cur_record.total_bytes = to!int(line[14]);
+                if (cur_line[14] != header.unset_field)
+                    cur_record.total_bytes = to!int(cur_line[14]);
 
-            cur_record.missing_bytes = to!int(line[15]);
-            cur_record.overflow_bytes = to!int(line[16]);
+                cur_record.missing_bytes = to!int(cur_line[15]);
+                cur_record.overflow_bytes = to!int(cur_line[16]);
 
-            if (line[17] != header.unset_field) {
-                if (line[17] == "F") {
-                    cur_record.timedout = false;
-                } else {
-                    cur_record.timedout = true;
+                if (cur_line[17] != header.unset_field) {
+                    if (cur_line[17] == "F") {
+                        cur_record.timedout = false;
+                    } else {
+                        cur_record.timedout = true;
+                    }
                 }
-            }
 
-            if (line[18] != header.unset_field)
-                cur_record.parent_fuid = line[18];
+                if (cur_line[18] != header.unset_field)
+                    cur_record.parent_fuid = cur_line[18];
 
-            if (line[19] != header.unset_field)
-                cur_record.md5 = line[19];
+                if (cur_line[19] != header.unset_field)
+                    cur_record.md5 = cur_line[19];
 
-            if (line[20] != header.unset_field)
-                cur_record.sha1 = line[20];
+                if (cur_line[20] != header.unset_field)
+                    cur_record.sha1 = cur_line[20];
 
-            if (line[21] != header.unset_field)
-                cur_record.sha256 = line[21];
+                if (cur_line[21] != header.unset_field)
+                    cur_record.sha256 = cur_line[21];
 
-            if (line[22] != header.unset_field)
-                cur_record.extracted = line[22];
+                if (cur_line[22] != header.unset_field)
+                    cur_record.extracted = cur_line[22];
 
-            if (line[23] != header.unset_field) {
-                if (line[23] == "F") {
-                    cur_record.extracted_cutoff = false;
-                } else {
-                    cur_record.extracted_cutoff = true;
+                if (cur_line[23] != header.unset_field) {
+                    if (cur_line[23] == "F") {
+                        cur_record.extracted_cutoff = false;
+                    } else {
+                        cur_record.extracted_cutoff = true;
+                    }
                 }
+
+                if (cur_line[24] != header.unset_field)
+                    cur_record.extracted_size = to!int(cur_line[24]);
+
+                yield(cur_record);
             }
-
-            if (line[24] != header.unset_field)
-                cur_record.extracted_size = to!int(line[24]);
-
-            ++rec_num;
-            contents[rec_num] = cur_record;
-        }
-
-        return contents;
+        });
     }
 }
 
@@ -168,7 +165,15 @@ version(unittest) {
         auto parser = new Parser();
         header = parser.parse_log_header(file);
         auto files_test = new Files;
-        results = files_test.parse_file(header, file);
+
+        auto gen = files_test.parse_file(header, file);
+        auto i = 0;
+        while (!gen.empty()) {
+            Files.Record record = gen.front();
+            results[i] = record;
+            gen.popFront();
+            i++;
+        }
     }
 
     @("files_read_header")
@@ -190,164 +195,187 @@ version(unittest) {
     @("files_read_record_1")
     @safe unittest
     {
-        results[1].ts.should == 1531687175.678291;
-        results[1].fuid.should == "FqxvGx22DT6AwxHGPl";
+        int entry = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i].fuid == "FqxvGx22DT6AwxHGPl")
+                entry = i;
+        }
+
+        if (entry == -1)
+            throw new Exception("Record not found");
+
+        results[entry].ts.should == 1531687175.678291;
 
         string[1] tx_hosts_;
-        foreach(ulong i; 0 .. results[1].tx_hosts.length) {
-            tx_hosts_[i] = results[1].tx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].tx_hosts.length) {
+            tx_hosts_[i] = results[entry].tx_hosts[i].toAddrString();
         }
         tx_hosts_.should == ["10.0.0.5"];
 
         string[1] rx_hosts_;
-        foreach(ulong i; 0 .. results[1].rx_hosts.length) {
-            rx_hosts_[i] = results[1].rx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].rx_hosts.length) {
+            rx_hosts_[i] = results[entry].rx_hosts[i].toAddrString();
         }
         rx_hosts_.should == ["10.0.0.2"];
 
-        results[1].conn_uids.should == ["C49NlPigbiwRa1aJ3"];
-        results[1].source.should == "SSL";
-        results[1].depth.should == 0;
-        results[1].analyzers.should == ["X509", "MD5", "SHA1"];
-        results[1].mime_type.should == "application/pkix-cert";
-        results[1].filename.should == "test_filename";
-        results[1].duration.should == 0.000000;
-        results[1].local_orig.should == true;
-        results[1].is_orig.should == false;
-        results[1].seen_bytes.should == 1964;
-        assert(results[1].total_bytes.isNull);
-        results[1].missing_bytes.should == 0;
-        results[1].overflow_bytes.should == 0;
-        results[1].timedout.should == false;
-        assert(results[1].parent_fuid.isNull);
-        results[1].md5.should == "5c7ef8e7311db007a796fcfb69335e68";
-        results[1].sha1.should == "ccaa484866460e91532c9c7c232ab1744d299d33";
-        assert(results[1].sha256.isNull);
-        assert(results[1].extracted.isNull);
-        assert(results[1].extracted_cutoff.isNull);
-        assert(results[1].extracted_size.isNull);
+        results[entry].conn_uids.should == ["C49NlPigbiwRa1aJ3"];
+        results[entry].source.should == "SSL";
+        results[entry].depth.should == 0;
+        results[entry].analyzers.should == ["X509", "MD5", "SHA1"];
+        results[entry].mime_type.should == "application/pkix-cert";
+        results[entry].filename.should == "test_filename";
+        results[entry].duration.should == 0.000000;
+        results[entry].local_orig.should == true;
+        results[entry].is_orig.should == false;
+        results[entry].seen_bytes.should == 1964;
+        assert(results[entry].total_bytes.isNull);
+        results[entry].missing_bytes.should == 0;
+        results[entry].overflow_bytes.should == 0;
+        results[entry].timedout.should == false;
+        assert(results[entry].parent_fuid.isNull);
+        results[entry].md5.should == "5c7ef8e7311db007a796fcfb69335e68";
+        results[entry].sha1.should == "ccaa484866460e91532c9c7c232ab1744d299d33";
+        assert(results[entry].sha256.isNull);
+        assert(results[entry].extracted.isNull);
+        assert(results[entry].extracted_cutoff.isNull);
+        assert(results[entry].extracted_size.isNull);
     }
 
     @("files_read_record_2")
     @safe unittest
     {
-        results[2].ts.should == 1531687185.306279;
-        results[2].fuid.should == "FFRgqxygVeipwAvKl";
+        int entry = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i].fuid == "FFRgqxygVeipwAvKl")
+                entry = i;
+        }
+
+        results[entry].ts.should == 1531687185.306279;
 
         string[1] tx_hosts_;
-        foreach(ulong i; 0 .. results[2].tx_hosts.length) {
-            tx_hosts_[i] = results[2].tx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].tx_hosts.length) {
+            tx_hosts_[i] = results[entry].tx_hosts[i].toAddrString();
         }
         tx_hosts_.should == ["fe80::250:f1ff:fe80:0"];
 
         string[1] rx_hosts_;
-        foreach(ulong i; 0 .. results[2].rx_hosts.length) {
-            rx_hosts_[i] = results[2].rx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].rx_hosts.length) {
+            rx_hosts_[i] = results[entry].rx_hosts[i].toAddrString();
         }
         rx_hosts_.should == ["fe80:541:4303:db20:9db7:490b:983b:62ca"];
 
-        results[2].conn_uids.should == ["CuVIzg2991yFw6ZZl"];
-        results[2].source.should == "HTTP";
-        results[2].depth.should == 0;
-        results[2].analyzers.shouldBeEmpty();
-        results[2].mime_type.should == "application/ocsp-request";
-        assert(results[2].filename.isNull);
-        results[2].duration.should == 0.000000;
-        results[2].local_orig.should == false;
-        results[2].is_orig.should == true;
-        results[2].seen_bytes.should == 75;
-        results[2].total_bytes.should == 75;
-        results[2].missing_bytes.should == 0;
-        results[2].overflow_bytes.should == 0;
-        results[2].timedout.should == false;
-        assert(results[2].parent_fuid.isNull);
-        assert(results[2].md5.isNull);
-        assert(results[2].sha1.isNull);
-        assert(results[2].sha256.isNull);
-        assert(results[2].extracted.isNull);
-        assert(results[2].extracted_cutoff.isNull);
-        assert(results[2].extracted_size.isNull);
+        results[entry].conn_uids.should == ["CuVIzg2991yFw6ZZl"];
+        results[entry].source.should == "HTTP";
+        results[entry].depth.should == 0;
+        results[entry].analyzers.shouldBeEmpty();
+        results[entry].mime_type.should == "application/ocsp-request";
+        assert(results[entry].filename.isNull);
+        results[entry].duration.should == 0.000000;
+        results[entry].local_orig.should == false;
+        results[entry].is_orig.should == true;
+        results[entry].seen_bytes.should == 75;
+        results[entry].total_bytes.should == 75;
+        results[entry].missing_bytes.should == 0;
+        results[entry].overflow_bytes.should == 0;
+        results[entry].timedout.should == false;
+        assert(results[entry].parent_fuid.isNull);
+        assert(results[entry].md5.isNull);
+        assert(results[entry].sha1.isNull);
+        assert(results[entry].sha256.isNull);
+        assert(results[entry].extracted.isNull);
+        assert(results[entry].extracted_cutoff.isNull);
+        assert(results[entry].extracted_size.isNull);
     }
 
     @("files_read_record_3")
     @safe unittest
     {
-        results[3].ts.should == 1531687191.158275;
-        results[3].fuid.should == "FHDk0m2U0SNRGPYN5g";
+        int entry = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i].fuid == "FHDk0m2U0SNRGPYN5g")
+                entry = i;
+        }
+
+        results[entry].ts.should == 1531687191.158275;
 
         string[1] tx_hosts_;
-        foreach(ulong i; 0 .. results[3].tx_hosts.length) {
-            tx_hosts_[i] = results[3].tx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].tx_hosts.length) {
+            tx_hosts_[i] = results[entry].tx_hosts[i].toAddrString();
         }
         tx_hosts_.should == ["10.0.0.2"];
 
         string[1] rx_hosts_;
-        foreach(ulong i; 0 .. results[3].rx_hosts.length) {
-            rx_hosts_[i] = results[3].rx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].rx_hosts.length) {
+            rx_hosts_[i] = results[entry].rx_hosts[i].toAddrString();
         }
         rx_hosts_.should == ["10.0.0.3"];
 
-        results[3].conn_uids.should == ["Czi9O3kaUI8DpgVCd"];
-        results[3].source.should == "HTTP";
-        results[3].depth.should == 0;
-        results[3].analyzers.shouldBeEmpty();
-        results[3].mime_type.should == "application/ocsp-request";
-        assert(results[3].filename.isNull);
-        results[3].duration.should == 0.000000;
-        assert(results[3].local_orig.isNull);
-        results[3].is_orig.should == true;
-        results[3].seen_bytes.should == 83;
-        results[3].total_bytes.should == 83;
-        results[3].missing_bytes.should == 0;
-        results[3].overflow_bytes.should == 0;
-        results[3].timedout.should == true;
-        assert(results[3].parent_fuid.isNull);
-        assert(results[3].md5.isNull);
-        assert(results[3].sha1.isNull);
-        assert(results[3].sha256.isNull);
-        assert(results[3].extracted.isNull);
-        results[3].extracted_cutoff.should == false;
-        assert(results[3].extracted_size.isNull);
+        results[entry].conn_uids.should == ["Czi9O3kaUI8DpgVCd"];
+        results[entry].source.should == "HTTP";
+        results[entry].depth.should == 0;
+        results[entry].analyzers.shouldBeEmpty();
+        results[entry].mime_type.should == "application/ocsp-request";
+        assert(results[entry].filename.isNull);
+        results[entry].duration.should == 0.000000;
+        assert(results[entry].local_orig.isNull);
+        results[entry].is_orig.should == true;
+        results[entry].seen_bytes.should == 83;
+        results[entry].total_bytes.should == 83;
+        results[entry].missing_bytes.should == 0;
+        results[entry].overflow_bytes.should == 0;
+        results[entry].timedout.should == true;
+        assert(results[entry].parent_fuid.isNull);
+        assert(results[entry].md5.isNull);
+        assert(results[entry].sha1.isNull);
+        assert(results[entry].sha256.isNull);
+        assert(results[entry].extracted.isNull);
+        results[entry].extracted_cutoff.should == false;
+        assert(results[entry].extracted_size.isNull);
     }
 
     @("files_read_record_4")
     @safe unittest
     {
-        results[4].ts.should == 1531687191.190277;
-        results[4].fuid.should == "F6sICI3IY4vu5U4ys1";
+        int entry = -1;
+        for (int i = 0; i < results.length; i++) {
+            if (results[i].fuid == "F6sICI3IY4vu5U4ys1")
+                entry = i;
+        }
+
+        results[entry].ts.should == 1531687191.190277;
 
         string[1] tx_hosts_;
-        foreach(ulong i; 0 .. results[4].tx_hosts.length) {
-            tx_hosts_[i] = results[4].tx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].tx_hosts.length) {
+            tx_hosts_[i] = results[entry].tx_hosts[i].toAddrString();
         }
         tx_hosts_.should == ["10.0.0.4"];
 
         string[1] rx_hosts_;
-        foreach(ulong i; 0 .. results[4].rx_hosts.length) {
-            rx_hosts_[i] = results[4].rx_hosts[i].toAddrString();
+        foreach(ulong i; 0 .. results[entry].rx_hosts.length) {
+            rx_hosts_[i] = results[entry].rx_hosts[i].toAddrString();
         }
         rx_hosts_.should == ["10.0.0.2"];
 
-        results[4].conn_uids.should == ["Czi9O3kaUI8DpgVCd"];
-        results[4].source.should == "HTTP";
-        results[4].depth.should == 0;
-        results[4].analyzers.shouldBeEmpty();
-        results[4].mime_type.should == "application/ocsp-response";
-        assert(results[4].filename.isNull);
-        results[4].duration.should == 0.000000;
-        assert(results[4].local_orig.isNull);
-        results[4].is_orig.should == false;
-        results[4].seen_bytes.should == 471;
-        results[4].total_bytes.should == 471;
-        results[4].missing_bytes.should == 0;
-        results[4].overflow_bytes.should == 0;
-        results[4].timedout.should == false;
-        assert(results[4].parent_fuid.isNull);
-        assert(results[4].md5.isNull);
-        assert(results[4].sha1.isNull);
-        assert(results[4].sha256.isNull);
-        assert(results[4].extracted.isNull);
-        results[4].extracted_cutoff.should == true;
-        results[4].extracted_size.should == 1800;
+        results[entry].conn_uids.should == ["Czi9O3kaUI8DpgVCd"];
+        results[entry].source.should == "HTTP";
+        results[entry].depth.should == 0;
+        results[entry].analyzers.shouldBeEmpty();
+        results[entry].mime_type.should == "application/ocsp-response";
+        assert(results[entry].filename.isNull);
+        results[entry].duration.should == 0.000000;
+        assert(results[entry].local_orig.isNull);
+        results[entry].is_orig.should == false;
+        results[entry].seen_bytes.should == 471;
+        results[entry].total_bytes.should == 471;
+        results[entry].missing_bytes.should == 0;
+        results[entry].overflow_bytes.should == 0;
+        results[entry].timedout.should == false;
+        assert(results[entry].parent_fuid.isNull);
+        assert(results[entry].md5.isNull);
+        assert(results[entry].sha1.isNull);
+        assert(results[entry].sha256.isNull);
+        assert(results[entry].extracted.isNull);
+        results[entry].extracted_cutoff.should == true;
+        results[entry].extracted_size.should == 1800;
     }
 }
