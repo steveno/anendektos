@@ -181,42 +181,31 @@ class Parser {
     }
 
     private void validate_summarize_config() {
+        bool valid;
+
         foreach(key, value; this.options.ini["summarize_by"].keys)
         {
-            bool valid = false;
             switch (key) {
                 default:
                     log.fatal("Invalid configuration key summarize_by[%s]", key);
                     throw new Exception("Invalid configuration key. Check log.");
                 case "conn":
-                    foreach(member; __traits(allMembers, Conn.Record))
-                        if (member == value)
-                            valid = true;
+                    valid = validate_record_member(new Conn(), value);
                     break;
                 case "dns":
-                    foreach(member; __traits(allMembers, Dns.Record))
-                        if (member == value)
-                            valid = true;
+                    valid = validate_record_member(new Dns(), value);
                     break;
                 case "files":
-                    foreach(member; __traits(allMembers, Files.Record))
-                        if (member == value)
-                            valid = true;
+                    valid = validate_record_member(new Files(), value);
                     break;
                 case "http":
-                    foreach(member; __traits(allMembers, Http.Record))
-                        if (member == value)
-                            valid = true;
+                    valid = validate_record_member(new Http(), value);
                     break;
                 case "ssl":
-                    foreach(member; __traits(allMembers, Ssl.Record))
-                        if (member == value)
-                            valid = true;
+                    valid = validate_record_member(new Ssl(), value);
                     break;
                 case "x509":
-                    foreach(member; __traits(allMembers, X509.Record))
-                        if (member == value)
-                            valid = true;
+                    valid = validate_record_member(new X509(), value);
                     break;
             }
 
@@ -225,6 +214,14 @@ class Parser {
                 throw new Exception("Invalid configuration value. Check log");
             }
         }
+    }
+
+    private bool validate_record_member(T)(T parser, string value) {
+        foreach(member; __traits(allMembers, parser.Record))
+            if (member == value)
+                return true;
+
+        return false;
     }
 }
 
