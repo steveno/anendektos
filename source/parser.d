@@ -12,6 +12,12 @@ import std.string;
 
 import config;
 import logging;
+import parsers.conn;
+import parsers.dns;
+import parsers.files;
+import parsers.http;
+import parsers.ssl;
+import parsers.x509;
 
 class Parser {
     private immutable string log_suffix = ".log";
@@ -38,32 +44,28 @@ class Parser {
         File file;
         Header header;
 
+        validate_summarize_config();
+
         foreach (d; log_files) {
             file = File(d.name, "r");
             header = parse_log_header(file);
             try {
                 if (header.path == "conn") {
-                    import parsers.conn;
                     auto conn = new Conn();
                     summarize(conn, header, file);
                 } else if (header.path == "dns") {
-                    import parsers.dns;
                     auto dns = new Dns();
                     summarize(dns, header, file);
                 } else if (header.path == "http") {
-                    import parsers.http;
                     auto http = new Http();
                     summarize(http, header, file);
                 } else if (header.path == "files") {
-                    import parsers.files;
                     auto files = new Files();
                     summarize(files, header, file);
                 } else if (header.path == "ssl") {
-                    import parsers.ssl;
                     auto ssl = new Ssl();
                     summarize(ssl, header, file);
                 } else if (header.path == "x509") {
-                    import parsers.x509;
                     auto x509 = new X509();
                     summarize(x509, header, file);
                 } else {
@@ -176,6 +178,53 @@ class Parser {
         rbt.insert(tuple([1, 3], "b"));
         rbt.insert(tuple([2, 2], "p"));
         */
+    }
+
+    private void validate_summarize_config() {
+        foreach(key, value; this.options.ini["summarize_by"].keys)
+        {
+            bool valid = false;
+            switch (key) {
+                default:
+                    log.fatal("Invalid configuration key summarize_by[%s]", key);
+                    throw new Exception("Invalid configuration key. Check log.");
+                case "conn":
+                    foreach(member; __traits(allMembers, Conn.Record))
+                        if (member == value)
+                            valid = true;
+                    break;
+                case "dns":
+                    foreach(member; __traits(allMembers, Dns.Record))
+                        if (member == value)
+                            valid = true;
+                    break;
+                case "files":
+                    foreach(member; __traits(allMembers, Files.Record))
+                        if (member == value)
+                            valid = true;
+                    break;
+                case "http":
+                    foreach(member; __traits(allMembers, Http.Record))
+                        if (member == value)
+                            valid = true;
+                    break;
+                case "ssl":
+                    foreach(member; __traits(allMembers, Ssl.Record))
+                        if (member == value)
+                            valid = true;
+                    break;
+                case "x509":
+                    foreach(member; __traits(allMembers, X509.Record))
+                        if (member == value)
+                            valid = true;
+                    break;
+            }
+
+            if (!valid) {
+                log.fatal("Invalid configuration value summarize_by[%s] = %s", key, value);
+                throw new Exception("Invalid configuration value. Check log");
+            }
+        }
     }
 }
 
