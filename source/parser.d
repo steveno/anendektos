@@ -51,23 +51,17 @@ class Parser {
             header = parse_log_header(file);
             try {
                 if (header.path == "conn") {
-                    auto conn = new Conn();
-                    summarize(conn, header, file);
+                    summarize(new Conn(), header, file);
                 } else if (header.path == "dns") {
-                    auto dns = new Dns();
-                    summarize(dns, header, file);
+                    summarize(new Dns(), header, file);
                 } else if (header.path == "http") {
-                    auto http = new Http();
-                    summarize(http, header, file);
+                    summarize(new Http(), header, file);
                 } else if (header.path == "files") {
-                    auto files = new Files();
-                    summarize(files, header, file);
+                    summarize(new Files(), header, file);
                 } else if (header.path == "ssl") {
-                    auto ssl = new Ssl();
-                    summarize(ssl, header, file);
+                    summarize(new Ssl(), header, file);
                 } else if (header.path == "x509") {
-                    auto x509 = new X509();
-                    summarize(x509, header, file);
+                    summarize(new X509(), header, file);
                 } else {
                     this.log.warn("%s has not been implemented", header.path);
                 }
@@ -136,9 +130,16 @@ class Parser {
                 header.fields = split(line, header.seperator)[1..$];
                 continue;
             }
+
+            if (startsWith(line, "#types")) {
+                continue;
+            }
+
+            log.fatal("Invalid or unknown entry \"%s\" in %s header", line, file);
+            throw new Exception("Invalid or unknown entry in log header. Check log.");
         }
 
-        assert(false);
+        assert(0);
     }
 
     private static @safe pure string convHex(string hexData) {
@@ -259,6 +260,30 @@ version(unittest) {
         header.path.should == "conn";
         header.open.toISOString().should == "20180724T131650";
         header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes", "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
+    }
+
+    @("conn_header_with_pipe")
+    unittest {
+        File file = File("tests/headers/pipe_sep.log", "r");
+        Parser.Header header;
+        auto parser = new Parser();
+        header = parser.parse_log_header(file);
+
+        header.seperator.should == "|";
+        header.set_seperator.should == ",";
+        header.empty_field.should == "(empty)";
+        header.unset_field.should == "-";
+        header.path.should == "conn";
+        header.open.toISOString().should == "20180715T163941";
+        header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes", "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
+    }
+
+    @("conn_header_invalid_entry")
+    unittest {
+        File file = File("tests/headers/invalid_entry.log", "r");
+        Parser.Header header;
+        auto parser = new Parser();
+        parser.parse_log_header(file).shouldThrow!Exception;
     }
 
     @("convert_hex_to_string")
