@@ -58,3 +58,13 @@ class Config
         return instance_;
     }
 }
+
+
+version(unittest) {
+    import unit_threaded;
+
+    @("config_create_fail")
+    unittest {
+        auto config = new Config("/not/a/path").shouldThrow!Exception;
+    }
+}
