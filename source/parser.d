@@ -157,29 +157,6 @@ class Parser {
         return to!string(cast(char)to!int(result, 16));
     }
 
-    public void summarize(P, H, F)(P parser_type, H header, F file) {
-        parser_type.Record[int] res;
-        auto gen = parser_type.parse_file(header, file);
-        auto i = 0;
-        while (!gen.empty()) {
-            parser_type.Record record = gen.front();
-            res[i] = record;
-            gen.popFront();
-            i++;
-        }
-
-        /* TODO Summarize records
-        import std.container.rbtree;
-        import std.typecons;
-
-        auto value = tuple([1, 3], "t");
-        auto rbt = redBlackTree(value);
-        rbt.insert(tuple([1, 3], "b"));
-        rbt.insert(tuple([1, 3], "b"));
-        rbt.insert(tuple([2, 2], "p"));
-        */
-    }
-
     private void validate_summarize_config() {
         bool valid;
 
@@ -216,12 +193,35 @@ class Parser {
         }
     }
 
-    private bool validate_record_member(T)(T parser, string value) {
+    private static bool validate_record_member(T)(T parser, string value) {
         foreach(member; __traits(allMembers, parser.Record))
             if (member == value)
                 return true;
 
         return false;
+    }
+
+    public void summarize(P, H, F)(P parser_type, H header, F file) {
+        parser_type.Record[int] res;
+        auto gen = parser_type.parse_file(header, file);
+        auto i = 0;
+        while (!gen.empty()) {
+            parser_type.Record record = gen.front();
+            res[i] = record;
+            gen.popFront();
+            i++;
+        }
+
+        /* TODO Summarize records
+        import std.container.rbtree;
+        import std.typecons;
+
+        auto value = tuple([1, 3], "t");
+        auto rbt = redBlackTree(value);
+        rbt.insert(tuple([1, 3], "b"));
+        rbt.insert(tuple([1, 3], "b"));
+        rbt.insert(tuple([2, 2], "p"));
+        */
     }
 }
 
@@ -230,8 +230,7 @@ version(unittest) {
     import unit_threaded;
 
     @("conn_header_default")
-    unittest
-    {
+    unittest {
         File file = File("tests/headers/tab_sep.log", "r");
         Parser.Header header;
         auto parser = new Parser();
@@ -247,8 +246,7 @@ version(unittest) {
     }
 
     @("conn_header_with_space_sep")
-    unittest
-    {
+    unittest {
         File file = File("tests/headers/space_sep.log", "r");
         Parser.Header header;
         auto parser = new Parser();
@@ -264,9 +262,14 @@ version(unittest) {
     }
 
     @("convert_hex_to_string")
-    @safe pure unittest
-    {
+    @safe pure unittest {
         Parser.convHex("\\x09").should == "\t";
         Parser.convHex("\\x20").should == " ";
+    }
+
+    @("validate_record_member")
+    unittest {
+        Parser.validate_record_member(new Conn(), "ts").should == true;
+        Parser.validate_record_member(new X509(), "resp_ip").should == false;
     }
 }
