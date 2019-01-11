@@ -16,29 +16,29 @@ import std.stdio;
 import std.string;
 import std.traits;
 
-/// Defines the importance of a log message.
+// Defines the importance of a log message.
 enum LogLevel
 {
-    /// detailed tracing
+    // detailed tracing
     Trace = 1,
-    /// useful information
+    // useful information
     Info = 2,
-    /// potential problem
+    // potential problem
     Warn = 4,
-    /// recoverable error
+    // recoverable error
     Error = 8,
-    /// fatal failure
+    // fatal failure
     Fatal = 16,
 }
 
-/// Returns a bit set containing the level and all levels above.
+// Returns a bit set containing the level and all levels above.
 @safe
 uint orAbove(LogLevel level) pure
 {
     return [EnumMembers!LogLevel].find(level).reduce!"a | b";
 }
 
-/// Returns a bit set containing the level and all levels below.
+// Returns a bit set containing the level and all levels below.
 @safe
 uint orBelow(LogLevel level) pure
 {
@@ -142,18 +142,18 @@ shared static this()
     log = Log(stderrLogger);
 }
 
-/// Represents a logging event.
+// Represents a logging event.
 struct LogEvent
 {
-    /// local _time of the event
+    // local _time of the event
     SysTime time;
-    /// importance of the event
+    // importance of the event
     LogLevel level;
-    /// _file name of the event source
+    // _file name of the event source
     string file;
-    /// _line number of the event source
+    // _line number of the event source
     size_t line;
-    /// supplied _message
+    // supplied _message
     string message;
 }
 
