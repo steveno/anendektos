@@ -213,7 +213,7 @@ version(unittest) {
         results[entry].method.should == "POST";
         results[entry].host.should == "test.domain";
         results[entry].uri.should == "/GTSGIAG3";
-        assert(results[entry].referrer.isNull);
+        results[entry].referrer.should == "example.com";
         results[entry].http_version.should == "1.1";
         results[entry].user_agent.should == "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
         results[entry].request_body_len.should == 75;
