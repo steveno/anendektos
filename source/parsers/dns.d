@@ -56,10 +56,12 @@ class Dns : Parser {
      * Returns: Generator expression which returns a Dns.Record struct.
      */
     public auto parse_file(Header header, File log_file) {
+        int line_num = 0;
         auto range = log_file.byLine();
         return new Generator!(Record)({
             foreach (line; range) {
                 string[] cur_line = strip(to!string(line)).split(header.seperator);
+                line_num++;
 
                 // Skip empty lines
                 if (line == [] || startsWith(cur_line[0], "#"))
@@ -67,24 +69,71 @@ class Dns : Parser {
 
                 // Populate our record
                 Record cur_record;
-                cur_record.ts = to!double(cur_line[0]);
+                try {
+                    cur_record.ts = to!double(cur_line[0]);
+                } catch (Exception e) {
+                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.uid = cur_line[1];
                 cur_record.orig_h = parseAddress(cur_line[2]);
-                cur_record.orig_p = to!int(cur_line[3]);
+
+                try {
+                    cur_record.orig_p = to!int(cur_line[3]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.resp_h = parseAddress(cur_line[4]);
-                cur_record.resp_p = to!int(cur_line[5]);
+               
+                try {
+                    cur_record.resp_p = to!int(cur_line[5]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.proto = cur_line[6];
-                cur_record.trans_id = to!int(cur_line[7]);
+
+                try {
+                    cur_record.trans_id = to!int(cur_line[7]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[8] != header.unset_field)
                     cur_record.rtt = to!double(cur_line[8]);
 
                 cur_record.query = cur_line[9];
-                cur_record.qclass = to!int(cur_line[10]);
+                
+                try {
+                    cur_record.qclass = to!int(cur_line[10]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.qclass_name = cur_line[11];
-                cur_record.qtype = to!int(cur_line[12]);
+
+                try {
+                    cur_record.qtype = to!int(cur_line[12]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.qtype_name = cur_line[13];
-                cur_record.rcode = to!int(cur_line[14]);
+
+                try {
+                    cur_record.rcode = to!int(cur_line[14]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.rcode_name = cur_line[15];
 
                 if (cur_line[16] != header.unset_field) {
@@ -119,7 +168,12 @@ class Dns : Parser {
                     }
                 }
 
-                cur_record.Z = to!int(cur_line[20]);
+                try {
+                    cur_record.Z = to!int(cur_line[20]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[21] != header.unset_field)
                     cur_record.answers = cur_line[21].split(header.set_seperator);
