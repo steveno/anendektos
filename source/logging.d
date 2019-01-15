@@ -48,6 +48,9 @@ enum LogLevel {
     return [EnumMembers!LogLevel].retro.find(level).reduce!"a | b";
 }
 
+/**
+ * Return whether or not a specific level is disabled.
+ */
 @safe bool disabled(LogLevel level) pure {
     uint levels = 0;
 
@@ -136,15 +139,15 @@ shared static this() {
  * Represents a logging event.
  */
 struct LogEvent {
-    // local _time of the event
+    /// local _time of the event
     SysTime time;
-    // importance of the event
+    /// importance of the event
     LogLevel level;
-    // _file name of the event source
+    /// _file name of the event source
     string file;
-    // _line number of the event source
+    /// _line number of the event source
     size_t line;
-    // supplied _message
+    /// supplied _message
     string message;
 }
 

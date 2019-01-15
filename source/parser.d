@@ -151,6 +151,7 @@ class Parser {
             throw new Exception("Invalid or unknown entry in log header. Check log.");
         }
 
+        // dmd complains without this here
         assert(0);
     }
 
