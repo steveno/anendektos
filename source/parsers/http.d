@@ -15,6 +15,9 @@ import parser;
 
 
 class Http : Parser {
+    /**
+     * Struct to hold the information for a line in http log file.
+     */
     struct Record {
         double ts;
         string uid;

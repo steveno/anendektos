@@ -25,6 +25,11 @@ class Config
         }
     }
 
+    /**
+     * Returns the current instance of the logging object assuming that it has
+     * either already been instantiated or the relevant configuration file is
+     * in it's default location.
+     */
     static Config get() {
         if (!instantiated_) {
             synchronized(Config.classinfo) {
@@ -44,6 +49,10 @@ class Config
         return instance_;
     }
 
+    /**
+     * Returns the current instance of the logging object. If it has not been
+     * instantiated, a new object is created based upon the path parameter.
+     */
     static Config get(string path) {
         if (!instantiated_) {
             synchronized(Config.classinfo) {

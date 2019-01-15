@@ -16,6 +16,9 @@ import parser;
 
 
 class Dns : Parser {
+    /**
+     * Struct to hold the information for a line in dns log file.
+     */
     struct Record {
         double ts;
         string uid;

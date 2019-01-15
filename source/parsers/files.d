@@ -15,6 +15,9 @@ import parser;
 
 
 class Files : Parser {
+    /**
+     * Struct to hold the information for a line in files log file.
+     */
     struct Record {
         double ts;
         string fuid;

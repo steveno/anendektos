@@ -15,6 +15,9 @@ import parser;
 
 
 class Conn : Parser {
+    /**
+     * Struct to hold the information for a line in conn log file.
+     */
     struct Record {
         double ts;
         string uid;

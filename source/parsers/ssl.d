@@ -15,6 +15,9 @@ import parser;
 
 
 class Ssl : Parser {
+    /**
+     * Struct to hold the information for a line in ssl log file.
+     */
     struct Record {
         double ts;
         string uid;

@@ -15,6 +15,9 @@ import parser;
 
 
 class X509 : Parser {
+    /**
+     * Struct to hold the information for a line in x509 log file.
+     */
     struct Record {
         double ts;
         string id;

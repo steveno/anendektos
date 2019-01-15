@@ -11,6 +11,9 @@ class Arguments {
     string bro_path = "";
     string config_path = "";
 
+    /**
+     * Parse the command line arguments from the command line.
+     */
     public string parse_arguments(string[] args) {
         string ret_msg = "";
         bool skip_next = false;
@@ -66,10 +69,16 @@ class Arguments {
         return ret_msg;
     }
 
+    /**
+     * Print the application version to the command line.
+     */
     private void print_version() {
         writeln("anendektos - version 1.0.0");
     }
 
+    /**
+     * Print the help text to the command line.
+     */
     private void print_help() {
         string help_text = "
 Usage: anendektos [--help] [--version] bro_path [bro_path] config_path [config_path]

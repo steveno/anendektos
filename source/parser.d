@@ -24,6 +24,9 @@ class Parser {
     private config.Config options;
     private logging.Log log;
 
+    /**
+     * Struct to hold header information from log files.
+     */
     struct Header {
         string seperator;
         string set_seperator;
@@ -39,6 +42,12 @@ class Parser {
         this.log = logging.Log(stderrLogger, stdoutLogger(LogLevel.Info), fileLogger(options.ini["application"].getKey("log_file")));
     }
 
+    /**
+     * Parses all of the log files in a bro_path.
+     *
+     * Will write warning messages to the log when files it doesn't know how
+     * to parse are encountered.
+     */
     public void parse_logs() {
         auto log_files = dirEntries(this.options.ini["application"].getKey("bro_path"), SpanMode.shallow);
         File file;
@@ -71,6 +80,9 @@ class Parser {
         }
     }
 
+    /**
+     * Parse a log's header information storing all the relavent parts.
+     */
     public Header parse_log_header(File file) {
         Header header;
 
@@ -142,6 +154,34 @@ class Parser {
         assert(0);
     }
 
+    public void summarize(P)(P parser_type, Header header, File file) {
+        parser_type.Record[int] res;
+        auto gen = parser_type.parse_file(header, file);
+        auto i = 0;
+        while (!gen.empty()) {
+            parser_type.Record record = gen.front();
+            res[i] = record;
+            gen.popFront();
+            i++;
+        }
+
+        /* TODO Summarize records
+        import std.container.rbtree;
+        import std.typecons;
+
+        auto value = tuple([1, 3], "t");
+        auto rbt = redBlackTree(value);
+        rbt.insert(tuple([1, 3], "b"));
+        rbt.insert(tuple([1, 3], "b"));
+        rbt.insert(tuple([2, 2], "p"));
+        */
+    }
+
+    /**
+     * Convert a hex character to its string representation
+     *
+     * Example: The string "//09x" will become the string " ".
+     */
     private static @safe pure string convHex(string hexData) {
         int cnt = 0;
         char[] result;
@@ -158,6 +198,9 @@ class Parser {
         return to!string(cast(char)to!int(result, 16));
     }
 
+    /**
+     * Validate the contents of the summarize_by section of the configuration file.
+     */
     private void validate_summarize_config() {
         bool valid;
 
@@ -194,7 +237,11 @@ class Parser {
         }
     }
 
-    private bool validate_members(T)(T parser, string value) {
+    /**
+     * Validate all of the members listed in each line of the summarize_by section
+     * of the configuration file.
+     */
+    private bool validate_members(P)(P parser, string value) {
         string[] aggregates = split(value, ":");
         if (aggregates.length > 2) {
             this.log.fatal("Too many colons in configuration value %s", value);
@@ -213,35 +260,15 @@ class Parser {
         return true;
     }
 
-    private bool validate_record_member(T)(T parser, string value) {
+    /**
+     * Validate a specific member is in the Record for a given parser.
+     */
+    private bool validate_record_member(P)(P parser, string value) {
         foreach(member; __traits(allMembers, parser.Record))
             if (member == value)
                 return true;
 
         return false;
-    }
-
-    public void summarize(P, H, F)(P parser_type, H header, F file) {
-        parser_type.Record[int] res;
-        auto gen = parser_type.parse_file(header, file);
-        auto i = 0;
-        while (!gen.empty()) {
-            parser_type.Record record = gen.front();
-            res[i] = record;
-            gen.popFront();
-            i++;
-        }
-
-        /* TODO Summarize records
-        import std.container.rbtree;
-        import std.typecons;
-
-        auto value = tuple([1, 3], "t");
-        auto rbt = redBlackTree(value);
-        rbt.insert(tuple([1, 3], "b"));
-        rbt.insert(tuple([1, 3], "b"));
-        rbt.insert(tuple([2, 2], "p"));
-        */
     }
 }
 
