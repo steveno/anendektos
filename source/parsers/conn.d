@@ -52,10 +52,12 @@ class Conn : Parser {
      * Returns: Generator expression which returns Conn.Record struct.
      */
     public auto parse_file(Header header, File log_file) {
+        int line_num = 0;
         auto range = log_file.byLine();
         return new Generator!(Record)({
             foreach (line; range) {
                 string[] cur_line = strip(to!string(line)).split(header.seperator);
+                line_num++;
 
                 // Skip empty lines
                 if (cur_line == [] || startsWith(cur_line[0], "#"))
@@ -63,20 +65,58 @@ class Conn : Parser {
 
                 // Populate our record
                 Record cur_record;
-                cur_record.ts = to!double(cur_line[0]);
+                try {
+                    cur_record.ts = to!double(cur_line[0]);
+                } catch (Exception e) {
+                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.uid = cur_line[1];
                 cur_record.orig_h = parseAddress(cur_line[2]);
-                cur_record.orig_p = to!int(cur_line[3]);
+
+                try {
+                    cur_record.orig_p = to!int(cur_line[3]);
+                } catch (Exception e) {
+                    super.log.error("Processing orig_p on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.resp_h = parseAddress(cur_line[4]);
-                cur_record.resp_p = to!int(cur_line[5]);
+
+                try {
+                    cur_record.resp_p = to!int(cur_line[5]);
+                } catch (Exception e) {
+                    super.log.error("Processing resp_p on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.proto = cur_line[6];
 
                 if (cur_line[7] != header.unset_field)
                     cur_record.service = cur_line[7];
 
-                cur_record.duration = to!double(cur_line[8]);
-                cur_record.orig_bytes = to!int(cur_line[9]);
-                cur_record.resp_bytes = to!int(cur_line[10]);
+                try {
+                    cur_record.duration = to!double(cur_line[8]);
+                } catch (Exception e) {
+                    super.log.error("Processing duration on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.orig_bytes = to!int(cur_line[9]);
+                } catch (Exception e) {
+                    super.log.error("Processing orig_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.resp_bytes = to!int(cur_line[10]);
+                } catch (Exception e) {
+                    super.log.error("Processing resp_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.conn_state = cur_line[11];
 
                 // Convert 0 and 1 to bool
@@ -97,16 +137,45 @@ class Conn : Parser {
                     }
                 }
 
-                cur_record.missed_bytes = to!int(cur_line[14]);
+                try {
+                    cur_record.missed_bytes = to!int(cur_line[14]);
+                } catch (Exception e) {
+                    super.log.error("Processing missed_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[15] != header.unset_field) {
                     cur_record.history = cur_line[15];
                 }
 
-                cur_record.orig_pkts = to!int(cur_line[16]);
-                cur_record.orig_ip_bytes = to!int(cur_line[17]);
-                cur_record.resp_pkts = to!int(cur_line[18]);
-                cur_record.resp_ip_bytes = to!int(cur_line[19]);
+
+                try {
+                    cur_record.orig_pkts = to!int(cur_line[16]);
+                } catch (Exception e) {
+                    super.log.error("Processing orig_pkts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.orig_ip_bytes = to!int(cur_line[17]);
+                } catch (Exception e) {
+                    super.log.error("Processing orig_ip_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.resp_pkts = to!int(cur_line[18]);
+                } catch (Exception e) {
+                    super.log.error("Processing resp_pkts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.resp_ip_bytes = to!int(cur_line[19]);
+                } catch (Exception e) {
+                    super.log.error("Processing resp_ip_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[20] != header.empty_field)
                     cur_record.tunnel_parents = cur_line[20].split(header.set_seperator);
