@@ -1,5 +1,5 @@
-//          Copyright Mario Kröplin 2018.
 //          Copyright Steven Oliver 2018.
+//          Copyright Mario Kröplin 2018.
 // Distributed under the Boost Software License, Version 1.0.
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
@@ -16,42 +16,42 @@ import std.stdio;
 import std.string;
 import std.traits;
 
-// Defines the importance of a log message.
-enum LogLevel
-{
-    // detailed tracing
+/**
+ * Defines the importance of a log message.
+ *
+ * There are five different logging levels:
+ *  * Trace = detailed tracing
+ *  * Info  = useful information
+ *  * Warn  = potential problem
+ *  * Error = recoverable error
+ *  * Fatal = fatal failure
+ */
+enum LogLevel {
     Trace = 1,
-    // useful information
     Info = 2,
-    // potential problem
     Warn = 4,
-    // recoverable error
     Error = 8,
-    // fatal failure
     Fatal = 16,
 }
 
-// Returns a bit set containing the level and all levels above.
-@safe
-uint orAbove(LogLevel level) pure
-{
+/**
+ * Returns a bit set containing the level and all levels above.
+ */
+@safe uint orAbove(LogLevel level) pure {
     return [EnumMembers!LogLevel].find(level).reduce!"a | b";
 }
 
-// Returns a bit set containing the level and all levels below.
-@safe
-uint orBelow(LogLevel level) pure
-{
+/**
+ * Returns a bit set containing the level and all levels below.
+ */
+@safe uint orBelow(LogLevel level) pure {
     return [EnumMembers!LogLevel].retro.find(level).reduce!"a | b";
 }
 
-@safe
-bool disabled(LogLevel level) pure
-{
+@safe bool disabled(LogLevel level) pure {
     uint levels = 0;
 
-    with (LogLevel)
-    {
+    with (LogLevel) {
         version (DisableTrace)
             levels |= Trace;
         version (DisableInfo)
@@ -66,19 +66,15 @@ bool disabled(LogLevel level) pure
     return (level & levels) != 0;
 }
 
-struct Log
-{
+struct Log {
     private Logger[] loggers;
 
     private uint levels;
 
     this(Logger[] loggers ...)
-    in
-    {
+    in {
         assert(loggers.all!"a !is null");
-    }
-    body
-    {
+    } body {
         this.loggers = loggers.dup;
         levels = reduce!((a, b) => a | b.levels)(0, this.loggers);
     }
@@ -91,36 +87,31 @@ struct Log
 
     private struct Fence {}  // argument cannot be provided explicitly
 
-    template append(LogLevel level)
-    {
+    template append(LogLevel level) {
         void append(alias fmt, Fence _ = Fence(), string file = __FILE__, size_t line = __LINE__, A...)
             (lazy A args)
-        if (isSomeString!(typeof(fmt)))
-        {
+        if (isSomeString!(typeof(fmt))) {
             static if (!level.disabled)
                 if (level & levels)
                     _append(level, file, line, format!fmt(args));
         }
 
         void append(Fence _ = Fence(), string file = __FILE__, size_t line = __LINE__, Char, A...)
-            (in Char[] fmt, lazy A args)
-        {
+            (in Char[] fmt, lazy A args) {
             static if (!level.disabled)
                 if (level & levels)
                     _append(level, file, line, format(fmt, args));
         }
 
         void append(Fence _ = Fence(), string file = __FILE__, size_t line = __LINE__, A)
-            (lazy A arg)
-        {
+            (lazy A arg) {
             static if (!level.disabled)
                 if (level & levels)
                     _append(level, file, line, arg.to!string);
         }
     }
 
-    private void _append(LogLevel level, string file, size_t line, string message)
-    {
+    private void _append(LogLevel level, string file, size_t line, string message) {
         LogEvent event;
 
         event.time = Clock.currTime;
@@ -137,14 +128,14 @@ struct Log
 
 __gshared Log log;
 
-shared static this()
-{
+shared static this() {
     log = Log(stderrLogger);
 }
 
-// Represents a logging event.
-struct LogEvent
-{
+/**
+ * Represents a logging event.
+ */
+struct LogEvent {
     // local _time of the event
     SysTime time;
     // importance of the event
@@ -158,75 +149,62 @@ struct LogEvent
 }
 
 auto fileLogger(alias Layout = layout)
-    (string name, uint levels = LogLevel.Info.orAbove)
-{
+    (string name, uint levels = LogLevel.Info.orAbove) {
     return new FileLogger!Layout(name, levels);
 }
 
 auto stderrLogger(alias Layout = layout)
-    (uint levels = LogLevel.Warn.orAbove)
-{
+    (uint levels = LogLevel.Warn.orAbove) {
     return new FileLogger!Layout(stderr, levels);
 }
 
 auto stdoutLogger(alias Layout = layout)
-    (uint levels = LogLevel.Info.orAbove)
-{
+    (uint levels = LogLevel.Info.orAbove) {
     return new FileLogger!Layout(stdout, levels);
 }
 
 version (Posix)
     auto syslogLogger(alias Layout = syslogLayout)
-        (string name = null, uint levels = LogLevel.Info.orAbove)
-    {
+        (string name = null, uint levels = LogLevel.Info.orAbove) {
         return new SyslogLogger!Layout(name, levels);
     }
 
-abstract class Logger
-{
+abstract class Logger {
     private uint levels;
 
-    this(uint levels)
-    {
+    this(uint levels) {
         this.levels = levels;
     }
 
     abstract void append(ref LogEvent event);
 }
 
-class FileLogger(alias Layout) : Logger
-{
+class FileLogger(alias Layout) : Logger {
     private File file;
 
-    this(string name, uint levels = LogLevel.Info.orAbove)
-    {
+    this(string name, uint levels = LogLevel.Info.orAbove) {
         super(levels);
         file = File(name, "ab");
     }
 
-    this(File file, uint levels = LogLevel.Info.orAbove)
-    {
+    this(File file, uint levels = LogLevel.Info.orAbove) {
         super(levels);
         this.file = file;
     }
 
-    override void append(ref LogEvent event)
-    {
+    override void append(ref LogEvent event) {
         Layout(this.file.lockingTextWriter, event);
         this.file.flush;
     }
 }
 
-version (Posix)
-{
+version (Posix) {
     private extern (C) void openlog(const char *ident, int option, int facility);
 
     private extern (C) void syslog(int priority, const char *format, ...);
 
-    class SyslogLogger(alias Layout) : Logger
-    {
-        enum SyslogLevel
-        {
+    class SyslogLogger(alias Layout) : Logger {
+        enum SyslogLevel {
             LOG_EMERG   = 0,  // system is unusable
             LOG_ALERT   = 1,  // action must be taken immediately
             LOG_CRIT    = 2,  // critical conditions
@@ -237,16 +215,14 @@ version (Posix)
             LOG_DEBUG   = 7,  // debug-level messages
         }
 
-        this(string identifier = null, uint levels = LogLevel.Info.orAbove)
-        {
+        this(string identifier = null, uint levels = LogLevel.Info.orAbove) {
             enum LOG_USER = 1 << 3;
 
             super(levels);
             openlog(identifier.empty ? null : identifier.toStringz, 0, LOG_USER);
         }
 
-        override void append(ref LogEvent event)
-        {
+        override void append(ref LogEvent event) {
             auto writer = appender!string;
 
             Layout(writer, event);
@@ -254,10 +230,8 @@ version (Posix)
             syslog(priority(event.level), "%s", writer.data.ptr);
         }
 
-        static SyslogLevel priority(LogLevel level) pure
-        {
-            final switch (level) with (LogLevel) with (SyslogLevel)
-            {
+        static SyslogLevel priority(LogLevel level) pure {
+            final switch (level) with (LogLevel) with (SyslogLevel) {
                 case Trace:
                     return LOG_DEBUG;
                 case Info:
@@ -272,23 +246,21 @@ version (Posix)
         }
     }
 
-    void syslogLayout(Writer)(Writer writer, ref LogEvent event)
-    {
+    void syslogLayout(Writer)(Writer writer, ref LogEvent event) {
         writer.put(event.message);
     }
 }
 
-// Time Thread Category Context layout
-void layout(Writer)(Writer writer, ref LogEvent event)
-{
+/**
+ * Time Thread Category Context layout
+ */
+void layout(Writer)(Writer writer, ref LogEvent event) {
     import core.thread : Thread;
 
-    with (event)
-    {
+    with (event) {
         writer.formattedWrite!"%s %-5s %s:%s"(time._toISOExtString, level, file, line);
 
-        if (Thread thread = Thread.getThis)
-        {
+        if (Thread thread = Thread.getThis) {
             string name = thread.name;
 
             if (!name.empty)
@@ -301,19 +273,20 @@ void layout(Writer)(Writer writer, ref LogEvent event)
     }
 }
 
-// SysTime.toISOExtString has no fixed length and no time-zone offset for local time
-private string _toISOExtString(SysTime time)
-{
+/**
+ * SysTime.toISOExtString has no fixed length and no time-zone offset for local time
+ */
+private string _toISOExtString(SysTime time) {
     return format!"%s.%03d%s"(
         (cast (DateTime) time).toISOExtString,
         time.fracSecs.total!"msecs",
         time.utcOffset._toISOString);
 }
 
-// SimpleTimeZone.toISOString is private
-@safe
-private string _toISOString(Duration offset) pure
-{
+/**
+ * SimpleTimeZone.toISOString is private
+ */
+@safe private string _toISOString(Duration offset) pure {
     uint hours;
     uint minutes;
 
@@ -325,8 +298,7 @@ version(unittest) {
     import unit_threaded;
 
     @("logging_orAbove")
-    @safe pure unittest
-    {
+    @safe pure unittest {
         with (LogLevel)
         {
             assert(Trace.orAbove == (Trace | Info | Warn | Error | Fatal));
@@ -335,8 +307,7 @@ version(unittest) {
     }
 
     @("logging_orBelow")
-    @safe pure unittest
-    {
+    @safe pure unittest {
         with (LogLevel)
         {
             assert(Trace.orBelow == Trace);
@@ -345,8 +316,7 @@ version(unittest) {
     }
 
     @("logging_datetime")
-    unittest
-    {
+    unittest {
         auto dateTime = DateTime(2003, 2, 1, 12);
         auto fracSecs = 123_456.usecs;
         auto timeZone =  new immutable SimpleTimeZone(1.hours);
@@ -356,8 +326,7 @@ version(unittest) {
     }
 
     @("logging_writer")
-    unittest
-    {
+    unittest {
         LogEvent event;
 
         event.time = SysTime.fromISOExtString("2003-02-01T11:55:00.123456Z");
@@ -373,8 +342,7 @@ version(unittest) {
     }
 
     @("logging_to_iso_string")
-    unittest
-    {
+    unittest {
         assert(_toISOString(90.minutes) == "+01:30");
         assert(_toISOString(-90.minutes) == "-01:30");
     }

@@ -43,6 +43,15 @@ class Files : Parser {
         Nullable!(int) extracted_size;
     };
 
+    /**
+     * Parse a files log file ensuring that the values in the log file
+     * conform to the types in our Record struct.
+     *
+     * Params: header = a Header object from the Parser class
+     *         log_file = a files log file to be parsed
+     *
+     * Returns: Generator expression which returns a Files.Record struct.
+     */
     public auto parse_file(Header header, File log_file) {
         auto range = log_file.byLine();
         return new Generator!(Record)({

@@ -43,6 +43,15 @@ class Dns : Parser {
         bool rejected;
     };
 
+    /**
+     * Parse a dns log file ensuring that the values in the log file
+     * conform to the types in our Record struct.
+     *
+     * Params: header = a Header object from the Parser class
+     *         log_file = a dns log file to be parsed
+     *
+     * Returns: Generator expression which returns a Dns.Record struct.
+     */
     public auto parse_file(Header header, File log_file) {
         auto range = log_file.byLine();
         return new Generator!(Record)({

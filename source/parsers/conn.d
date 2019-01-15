@@ -39,6 +39,15 @@ class Conn : Parser {
         string[] tunnel_parents;
     };
 
+    /**
+     * Parse a conn log file ensuring that the values in the log file
+     * conform to the types in our Record struct.
+     *
+     * Params: header = a Header object from the Parser class
+     *         log_file = a conn log file to be parsed
+     *
+     * Returns: Generator expression which returns Conn.Record struct.
+     */
     public auto parse_file(Header header, File log_file) {
         auto range = log_file.byLine();
         return new Generator!(Record)({

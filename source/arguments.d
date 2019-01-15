@@ -89,50 +89,21 @@ Named arguments
 version(unittest) {
     import unit_threaded;
 
-    /*
-    @("arguments_help_long")
-    unittest
-    {
-        // TODO
-    }
-
-    @("arguments_help_short")
-    unittest
-    {
-        // TODO
-    }
-
-    @("arguments_version_long")
-    unittest
-    {
-        // TODO
-    }
-
-    @("arguments_version_short")
-    unittest
-    {
-        // TODO
-    }
-    */
-
     @("arguments_config_path")
-    unittest
-    {
+    unittest {
         auto args = new Arguments();
         args.parse_arguments(["./test", "config_path", "/home/user/user.ini"]);
         args.config_path.should == "/home/user/user.ini";
     }
 
     @("arguments_bro_path")
-    unittest
-    {
+    unittest {
         auto args = new Arguments();
         args.parse_arguments(["./test", "bro_path", "/home/user/bro"]).shouldThrow!Exception;
     }
 
     @("arguments_bro_config_path")
-    unittest
-    {
+    unittest {
         auto args = new Arguments();
         args.parse_arguments(["./test", "bro_path", "/home/user/bro", "config_path", "/home/user/user.ini"]);
         args.bro_path.should == "/home/user/bro";
