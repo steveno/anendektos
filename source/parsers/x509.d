@@ -6,10 +6,10 @@ module parsers.x509;
 
 import std.concurrency: Generator, yield;
 import std.conv;
-import std.socket;
-import std.stdio;
-import std.string;
-import std.typecons;
+import std.socket: Address, parseAddress;
+import std.stdio: File;
+import std.string: strip, startsWith, split;
+import std.typecons: Nullable;
 
 import parser;
 
