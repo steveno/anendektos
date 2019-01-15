@@ -168,22 +168,22 @@ class Parser {
                     log.fatal("Invalid configuration key summarize_by[%s]", key);
                     throw new Exception("Invalid configuration key. Check log.");
                 case "conn":
-                    valid = validate_record_member(new Conn(), value);
+                    valid = validate_members(new Conn(), value);
                     break;
                 case "dns":
-                    valid = validate_record_member(new Dns(), value);
+                    valid = validate_members(new Dns(), value);
                     break;
                 case "files":
-                    valid = validate_record_member(new Files(), value);
+                    valid = validate_members(new Files(), value);
                     break;
                 case "http":
-                    valid = validate_record_member(new Http(), value);
+                    valid = validate_members(new Http(), value);
                     break;
                 case "ssl":
-                    valid = validate_record_member(new Ssl(), value);
+                    valid = validate_members(new Ssl(), value);
                     break;
                 case "x509":
-                    valid = validate_record_member(new X509(), value);
+                    valid = validate_members(new X509(), value);
                     break;
             }
 
@@ -194,7 +194,26 @@ class Parser {
         }
     }
 
-    private static bool validate_record_member(T)(T parser, string value) {
+    private bool validate_members(T)(T parser, string value) {
+        string[] aggregates = split(value, ":");
+        if (aggregates.length > 2) {
+            this.log.fatal("Too many colons in configuration value %s", value);
+            throw new Exception("Invalid configuration value. Check log");
+        }
+
+        for (int i = 0; i < 2; i++) {
+            foreach (string column_header; split(aggregates[i], ",")) {
+                if (!validate_record_member(parser, column_header)) {
+                    this.log.fatal("Invalid configuration value %s", column_header);
+                    throw new Exception("Invalid configuration value. Check log");
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private bool validate_record_member(T)(T parser, string value) {
         foreach(member; __traits(allMembers, parser.Record))
             if (member == value)
                 return true;
@@ -294,7 +313,20 @@ version(unittest) {
 
     @("validate_record_member")
     unittest {
-        Parser.validate_record_member(new Conn(), "ts").should == true;
-        Parser.validate_record_member(new X509(), "resp_ip").should == false;
+        auto parser = new Parser();
+        parser.validate_record_member(new Conn(), "ts").should == true;
+        parser.validate_record_member(new X509(), "resp_ip").should == false;
+    }
+
+    @("validate_members")
+    unittest {
+        auto parser = new Parser();
+        parser.validate_members(new Conn(), "ts:resp_h").should == true;
+        parser.validate_members(new Conn(), "ts,resp_p:resp_h").should == true;
+        parser.validate_members(new Conn(), "ts:resp_h,resp_p").should == true;
+        parser.validate_members(new Conn(), "ts,resp_p:resp_h,uid").should == true;
+
+        parser.validate_members(new Conn(), "ts:uid:resp_h").shouldThrow!Exception;
+        parser.validate_members(new Conn(), "ts:resp_g").shouldThrow!Exception;
     }
 }
