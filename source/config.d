@@ -63,8 +63,26 @@ class Config
 version(unittest) {
     import unit_threaded;
 
+    @("config_create")
+    unittest {
+        auto config = new Config("anendektos.ini");
+        config.ini["application"].getKey("log_file").should == "../anendektos.log";
+    }
+
     @("config_create_fail")
     unittest {
         auto config = new Config("/not/a/path").shouldThrow!Exception;
+    }
+
+    @("config_create_get_default_path")
+    unittest {
+        auto config = Config.get();
+        config.ini["application"].getKey("log_file").should == "../anendektos.log";
+    }
+
+    @("config_create_get_with_path")
+    unittest {
+        auto config = Config.get("anendektos.ini");
+        config.ini["application"].getKey("log_file").should == "../anendektos.log";
     }
 }
