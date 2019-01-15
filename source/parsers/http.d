@@ -60,10 +60,12 @@ class Http : Parser {
      * Returns: Generator expression which returns an Http.Record struct.
      */
     public auto parse_file(Header header, File log_file) {
+        int line_num = 0;
         auto range = log_file.byLine();
         return new Generator!(Record)({
             foreach (line; range) {
                 string[] cur_line = strip(to!string(line)).split(header.seperator);
+                line_num++;
 
                 // Skip empty lines
                 if (line == [] || startsWith(cur_line[0], "#"))
@@ -71,13 +73,39 @@ class Http : Parser {
 
                 // Populate our record
                 Record cur_record;
-                cur_record.ts = to!double(cur_line[0]);
+                try {
+                    cur_record.ts = to!double(cur_line[0]);
+                } catch (Exception e) {
+                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.uid = cur_line[1];
                 cur_record.orig_h = parseAddress(cur_line[2]);
-                cur_record.orig_p = to!int(cur_line[3]);
+
+                try {
+                    cur_record.orig_p = to!int(cur_line[3]);
+                } catch (Exception e) {
+                    super.log.error("Processing orig_p on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.resp_h = parseAddress(cur_line[4]);
-                cur_record.resp_p = to!int(cur_line[5]);
-                cur_record.trans_depth = to!int(cur_line[6]);
+
+                try {
+                    cur_record.resp_p = to!int(cur_line[5]);
+                } catch (Exception e) {
+                    super.log.error("Processing resp_p on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.trans_depth = to!int(cur_line[6]);
+                } catch (Exception e) {
+                    super.log.error("Processing trans_depth on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.method = cur_line[7];
                 cur_record.host = cur_line[8];
                 cur_record.uri = cur_line[9];
@@ -87,13 +115,38 @@ class Http : Parser {
 
                 cur_record.http_version = cur_line[11];
                 cur_record.user_agent = cur_line[12];
-                cur_record.request_body_len = to!int(cur_line[13]);
-                cur_record.response_body_len = to!int(cur_line[14]);
-                cur_record.status_code = to!int(cur_line[15]);
+
+                try {
+                    cur_record.request_body_len = to!int(cur_line[13]);
+                } catch (Exception e) {
+                    super.log.error("Processing request_body_len on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.response_body_len = to!int(cur_line[14]);
+                } catch (Exception e) {
+                    super.log.error("Processing response_body_len on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.status_code = to!int(cur_line[15]);
+                } catch (Exception e) {
+                    super.log.error("Processing status_code on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.status_msg = cur_line[16];
 
-                if (cur_line[17] != header.unset_field)
-                    cur_record.info_code = to!int(cur_line[17]);
+                if (cur_line[17] != header.unset_field) {
+                    try {
+                        cur_record.info_code = to!int(cur_line[17]);
+                    } catch (Exception e) {
+                        super.log.error("Processing info_code on line %d: %s", line_num, e.msg);
+                        continue;
+                    }
+                }
 
                 if (cur_line[18] != header.unset_field)
                     cur_record.info_msg = cur_line[18];

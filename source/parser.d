@@ -22,7 +22,7 @@ import parsers.x509;
 class Parser {
     private immutable string log_suffix = ".log";
     private config.Config options;
-    private logging.Log log;
+    public logging.Log log;
 
     /**
      * Struct to hold header information from log files.
