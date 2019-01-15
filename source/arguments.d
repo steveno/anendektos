@@ -96,10 +96,22 @@ version(unittest) {
         args.config_path.should == "/home/user/user.ini";
     }
 
-    @("arguments_bro_path")
+    @("arguments_config_path_no_path")
+    unittest {
+        auto args = new Arguments();
+        args.parse_arguments(["./test", "config_path"]).shouldThrow!Exception;
+    }
+
+    @("arguments_bro_path_no_config_path")
     unittest {
         auto args = new Arguments();
         args.parse_arguments(["./test", "bro_path", "/home/user/bro"]).shouldThrow!Exception;
+    }
+
+    @("arguments_bro_path_no_path")
+    unittest {
+        auto args = new Arguments();
+        args.parse_arguments(["./test", "bro_path"]).shouldThrow!Exception;
     }
 
     @("arguments_bro_config_path")
