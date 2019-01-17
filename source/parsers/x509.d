@@ -51,10 +51,12 @@ class X509 : Parser {
      * Returns: Generator expression which returns an X509.Record struct.
      */
     public auto parse_file(Header header, File log_file) {
+        int line_num = 0;
         auto range = log_file.byLine();
         return new Generator!(Record)({
             foreach (line; range) {
                 string[] cur_line = strip(to!string(line)).split(header.seperator);
+                line_num++;
 
                 // Skip empty lines
                 if (cur_line == [] || startsWith(cur_line[0], "#"))
@@ -62,21 +64,59 @@ class X509 : Parser {
 
                 // Populate our record
                 Record cur_record;
-                cur_record.ts = to!double(cur_line[0]);
+
+                try {
+                    cur_record.ts = to!double(cur_line[0]);
+                } catch (Exception e) {
+                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.id = cur_line[1];
-                cur_record.certificate_version = to!int(cur_line[2]);
+
+                try {
+                    cur_record.certificate_version = to!int(cur_line[2]);
+                } catch (Exception e) {
+                    super.log.error("Processing certificate_version on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.certificate_serial = cur_line[3];
                 cur_record.certificate_subject = cur_line[4];
                 cur_record.certificate_issuer = cur_line[5];
-                cur_record.certificate_not_valid_before = to!double(cur_line[6]);
-                cur_record.certificate_not_valid_after = to!double(cur_line[7]);
+
+                try {
+                    cur_record.certificate_not_valid_before = to!double(cur_line[6]);
+                } catch (Exception e) {
+                    super.log.error("Processing certificate_not_valid_before on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.certificate_not_valid_after = to!double(cur_line[7]);
+                } catch (Exception e) {
+                    super.log.error("Processing certificate_not_valid_after on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.certificate_key_alg = cur_line[8];
                 cur_record.certificate_sig_alg = cur_line[9];
                 cur_record.certificate_key_type = cur_line[10];
-                cur_record.certificate_key_length = to!int(cur_line[11]);
 
-                if (cur_line[12] != header.unset_field)
-                    cur_record.certificate_exponent = to!int(cur_line[12]);
+                try {
+                    cur_record.certificate_key_length = to!int(cur_line[11]);
+                } catch (Exception e) {
+                    super.log.error("Processing certificate_key_length on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    if (cur_line[12] != header.unset_field)
+                        cur_record.certificate_exponent = to!int(cur_line[12]);
+                } catch (Exception e) {
+                    super.log.error("Processing certificate_exponent on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[13] != header.unset_field)
                     cur_record.certificate_curve = cur_line[13];
@@ -116,8 +156,13 @@ class X509 : Parser {
                     }
                 }
 
-                if (cur_line[19] != header.unset_field)
-                    cur_record.basic_constraints_path_len = to!int(cur_line[19]);
+                try {
+                    if (cur_line[19] != header.unset_field)
+                        cur_record.basic_constraints_path_len = to!int(cur_line[19]);
+                } catch (Exception e) {
+                    super.log.error("Processing basic_constraints_path_len on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 yield(cur_record);
             }
