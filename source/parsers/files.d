@@ -56,10 +56,12 @@ class Files : Parser {
      * Returns: Generator expression which returns a Files.Record struct.
      */
     public auto parse_file(Header header, File log_file) {
+        int line_num = 0;
         auto range = log_file.byLine();
         return new Generator!(Record)({
             foreach (line; range) {
                 string[] cur_line = strip(to!string(line)).split(header.seperator);
+                line_num++;
 
                 // Skip empty lines
                 if (line == [] || startsWith(cur_line[0], "#"))
@@ -68,7 +70,13 @@ class Files : Parser {
                 // Populate our record
                 Record cur_record;
 
-                cur_record.ts = to!double(cur_line[0]);
+                try {
+                    cur_record.ts = to!double(cur_line[0]);
+                } catch (Exception e) {
+                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.fuid = cur_line[1];
 
                 if (cur_line[2] != header.unset_field) {
@@ -89,7 +97,13 @@ class Files : Parser {
                     cur_record.conn_uids = cur_line[4].split(header.set_seperator);
 
                 cur_record.source = cur_line[5];
-                cur_record.depth = to!int(cur_line[6]);
+
+                try {
+                    cur_record.depth = to!int(cur_line[6]);
+                } catch (Exception e) {
+                    super.log.error("Processing depth on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[7] != header.empty_field)
                     cur_record.analyzers = cur_line[7].split(header.set_seperator);
@@ -99,7 +113,12 @@ class Files : Parser {
                 if (cur_line[9] != header.unset_field)
                     cur_record.filename = cur_line[9];
 
-                cur_record.duration = to!double(cur_line[10]);
+                try {
+                    cur_record.duration = to!double(cur_line[10]);
+                } catch (Exception e) {
+                    super.log.error("Processing duration on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[11] != header.unset_field) {
                     if (cur_line[11] == "F") {
@@ -117,13 +136,34 @@ class Files : Parser {
                     }
                 }
 
-                cur_record.seen_bytes = to!int(cur_line[13]);
+                try {
+                    cur_record.seen_bytes = to!int(cur_line[13]);
+                } catch (Exception e) {
+                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
-                if (cur_line[14] != header.unset_field)
-                    cur_record.total_bytes = to!int(cur_line[14]);
+                try {
+                    if (cur_line[14] != header.unset_field)
+                        cur_record.total_bytes = to!int(cur_line[14]);
+                } catch (Exception e) {
+                    super.log.error("Processing total_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
-                cur_record.missing_bytes = to!int(cur_line[15]);
-                cur_record.overflow_bytes = to!int(cur_line[16]);
+                try {
+                    cur_record.missing_bytes = to!int(cur_line[15]);
+                } catch (Exception e) {
+                    super.log.error("Processing missing_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
+                try {
+                    cur_record.overflow_bytes = to!int(cur_line[16]);
+                } catch (Exception e) {
+                    super.log.error("Processing overflow_bytes on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[17] != header.unset_field) {
                     if (cur_line[17] == "F") {
@@ -156,8 +196,13 @@ class Files : Parser {
                     }
                 }
 
-                if (cur_line[24] != header.unset_field)
-                    cur_record.extracted_size = to!int(cur_line[24]);
+                try {
+                    if (cur_line[24] != header.unset_field)
+                        cur_record.extracted_size = to!int(cur_line[24]);
+                } catch (Exception e) {
+                    super.log.error("Processing extracted_size on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 yield(cur_record);
             }
