@@ -51,10 +51,12 @@ class Ssl : Parser {
      * Returns: Generator expression which returns an Ssl.Record struct.
      */
     public auto parse_file(Header header, File log_file) {
+        int line_num = 0;
         auto range = log_file.byLine();
         return new Generator!(Record)({
             foreach (line; range) {
                 string[] cur_line = strip(to!string(line)).split(header.seperator);
+                line_num++;
 
                 // Skip empty lines
                 if (line == [] || startsWith(cur_line[0], "#"))
@@ -62,12 +64,32 @@ class Ssl : Parser {
 
                 // Populate our record
                 Record cur_record;
-                cur_record.ts = to!double(cur_line[0]);
+
+                try {
+                    cur_record.ts = to!double(cur_line[0]);
+                } catch (Exception e) {
+                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.uid = cur_line[1];
                 cur_record.orig_h = parseAddress(cur_line[2]);
-                cur_record.orig_p = to!int(cur_line[3]);
+
+                try {
+                    cur_record.orig_p = to!int(cur_line[3]);
+                } catch (Exception e) {
+                    super.log.error("Processing orig_p on line %d: %s", line_num, e.msg);
+                    continue;
+                }
+
                 cur_record.resp_h = parseAddress(cur_line[4]);
-                cur_record.resp_p = to!int(cur_line[5]);
+
+                try {
+                    cur_record.resp_p = to!int(cur_line[5]);
+                } catch (Exception e) {
+                    super.log.error("Processing resp_p on line %d: %s", line_num, e.msg);
+                    continue;
+                }
 
                 if (cur_line[6] != header.unset_field)
                     cur_record.ssl_version = cur_line[6];
