@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import std.stdio;
+import std.experimental.logger;
 
 import arguments;
 import config;

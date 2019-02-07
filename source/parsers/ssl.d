@@ -10,6 +10,7 @@ import std.socket: Address, parseAddress;
 import std.stdio: File;
 import std.string: strip, startsWith, split;
 import std.typecons: Nullable;
+import std.experimental.logger;
 
 import parser;
 
@@ -68,7 +69,7 @@ class Ssl : Parser {
                 try {
                     cur_record.ts = to!double(cur_line[0]);
                 } catch (Exception e) {
-                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    error("Processing ts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -78,7 +79,7 @@ class Ssl : Parser {
                 try {
                     cur_record.orig_p = to!int(cur_line[3]);
                 } catch (Exception e) {
-                    super.log.error("Processing orig_p on line %d: %s", line_num, e.msg);
+                    error("Processing orig_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -87,7 +88,7 @@ class Ssl : Parser {
                 try {
                     cur_record.resp_p = to!int(cur_line[5]);
                 } catch (Exception e) {
-                    super.log.error("Processing resp_p on line %d: %s", line_num, e.msg);
+                    error("Processing resp_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 

@@ -1,27 +1,31 @@
 {
-	"name": "anendektos",
-        "targetType": "executable",
-        "targetPath": "bin",
-	"authors": [
-		"Steven Oliver"
-	],
-	"description": "ἀνένδεκτος - A bro log parser and summarizer",
-	"copyright": "Copyright © 2018, Steven Oliver",
-	"license": "MPL-2.0",
-        "unit-threaded": "~>0.7.46",
-        "dependencies": {
-            "dini": "~>2.0.0"
-	},
-        "configurations": [
-            { "name": "executable" },
-            {
-                "name": "unittest",
-                "targetType": "executable",
-                "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
-                "mainSourceFile": "bin/ut.d",
-                "dependencies": {
-                    "unit-threaded": "*"
-            }
-        }
-    ]
+  "name" : "anendektos",
+  "targetType" : "executable",
+  "targetPath" : "bin",
+  "authors" : [
+    "Steven Oliver"
+  ],
+  "description" : "ἀνένδεκτος - A bro log parser and summarizer",
+  "copyright" : "Copyright © 2018, Steven Oliver",
+  "license" : "MPL-2.0",
+  "unit-threaded" : "~>0.7.46",
+  "dependencies" : {
+    "dini" : "~>2.0.0"
+  },
+  "configurations" : [
+    {
+      "name" : "executable"
+    },
+    {
+      "name" : "unittest",
+      "targetType" : "executable",
+      "preBuildCommands" : [
+        "dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"
+      ],
+      "mainSourceFile" : "bin/ut.d",
+      "dependencies" : {
+        "unit-threaded" : "*"
+      }
+    }
+  ]
 }

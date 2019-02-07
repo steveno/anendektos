@@ -11,6 +11,7 @@ import std.socket: Address, parseAddress;
 import std.stdio: File;
 import std.string: strip, startsWith, split;
 import std.typecons: Nullable;
+import std.experimental.logger;
 
 import parser;
 
@@ -69,10 +70,11 @@ class Dns : Parser {
 
                 // Populate our record
                 Record cur_record;
+
                 try {
                     cur_record.ts = to!double(cur_line[0]);
                 } catch (Exception e) {
-                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    error("Processing ts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -82,7 +84,7 @@ class Dns : Parser {
                 try {
                     cur_record.orig_p = to!int(cur_line[3]);
                 } catch (Exception e) {
-                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    error("Processing  on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -91,7 +93,7 @@ class Dns : Parser {
                 try {
                     cur_record.resp_p = to!int(cur_line[5]);
                 } catch (Exception e) {
-                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    error("Processing  on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -100,7 +102,7 @@ class Dns : Parser {
                 try {
                     cur_record.trans_id = to!int(cur_line[7]);
                 } catch (Exception e) {
-                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    error("Processing  on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -112,7 +114,7 @@ class Dns : Parser {
                 try {
                     cur_record.qclass = to!int(cur_line[10]);
                 } catch (Exception e) {
-                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    error("Processing  on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -121,7 +123,7 @@ class Dns : Parser {
                 try {
                     cur_record.qtype = to!int(cur_line[12]);
                 } catch (Exception e) {
-                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    error("Processing  on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -130,7 +132,7 @@ class Dns : Parser {
                 try {
                     cur_record.rcode = to!int(cur_line[14]);
                 } catch (Exception e) {
-                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    error("Processing  on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -171,7 +173,7 @@ class Dns : Parser {
                 try {
                     cur_record.Z = to!int(cur_line[20]);
                 } catch (Exception e) {
-                    super.log.error("Processing  on line %d: %s", line_num, e.msg);
+                    error("Processing  on line %d: %s", line_num, e.msg);
                     continue;
                 }
 

@@ -10,6 +10,7 @@ import std.socket: Address, parseAddress;
 import std.stdio: File;
 import std.string: strip, startsWith, split;
 import std.typecons: Nullable;
+import std.experimental.logger;
 
 import parser;
 
@@ -68,7 +69,7 @@ class X509 : Parser {
                 try {
                     cur_record.ts = to!double(cur_line[0]);
                 } catch (Exception e) {
-                    super.log.error("Processing ts on line %d: %s", line_num, e.msg);
+                    error("Processing ts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -77,7 +78,7 @@ class X509 : Parser {
                 try {
                     cur_record.certificate_version = to!int(cur_line[2]);
                 } catch (Exception e) {
-                    super.log.error("Processing certificate_version on line %d: %s", line_num, e.msg);
+                    error("Processing certificate_version on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -88,14 +89,14 @@ class X509 : Parser {
                 try {
                     cur_record.certificate_not_valid_before = to!double(cur_line[6]);
                 } catch (Exception e) {
-                    super.log.error("Processing certificate_not_valid_before on line %d: %s", line_num, e.msg);
+                    error("Processing certificate_not_valid_before on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.certificate_not_valid_after = to!double(cur_line[7]);
                 } catch (Exception e) {
-                    super.log.error("Processing certificate_not_valid_after on line %d: %s", line_num, e.msg);
+                    error("Processing certificate_not_valid_after on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -106,7 +107,7 @@ class X509 : Parser {
                 try {
                     cur_record.certificate_key_length = to!int(cur_line[11]);
                 } catch (Exception e) {
-                    super.log.error("Processing certificate_key_length on line %d: %s", line_num, e.msg);
+                    error("Processing certificate_key_length on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -114,7 +115,7 @@ class X509 : Parser {
                     if (cur_line[12] != header.unset_field)
                         cur_record.certificate_exponent = to!int(cur_line[12]);
                 } catch (Exception e) {
-                    super.log.error("Processing certificate_exponent on line %d: %s", line_num, e.msg);
+                    error("Processing certificate_exponent on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -160,7 +161,7 @@ class X509 : Parser {
                     if (cur_line[19] != header.unset_field)
                         cur_record.basic_constraints_path_len = to!int(cur_line[19]);
                 } catch (Exception e) {
-                    super.log.error("Processing basic_constraints_path_len on line %d: %s", line_num, e.msg);
+                    error("Processing basic_constraints_path_len on line %d: %s", line_num, e.msg);
                     continue;
                 }
 

@@ -9,9 +9,9 @@ import std.datetime;
 import std.file;
 import std.stdio;
 import std.string;
+import std.experimental.logger;
 
 import config;
-import logging;
 import parsers.conn;
 import parsers.dns;
 import parsers.files;
@@ -19,10 +19,10 @@ import parsers.http;
 import parsers.ssl;
 import parsers.x509;
 
+
 class Parser {
     private immutable string log_suffix = ".log";
     private config.Config options;
-    public logging.Log log;
 
     /**
      * Struct to hold header information from log files.
@@ -39,7 +39,6 @@ class Parser {
 
     this() {
         this.options = config.Config.get();
-        this.log = logging.Log(stderrLogger, stdoutLogger(LogLevel.Info), fileLogger(options.ini["application"].getKey("log_file")));
     }
 
     /**
@@ -49,7 +48,12 @@ class Parser {
      * to parse are encountered.
      */
     public void parse_logs() {
-        auto log_files = dirEntries(this.options.ini["application"].getKey("bro_path"), SpanMode.shallow);
+        DirIterator log_files;
+        try {
+            log_files = dirEntries(this.options.ini["application"].getKey("bro_path"), SpanMode.shallow);
+        } catch (Exception e) {
+            fatal("bro_path %s does not exist", this.options.ini["application"].getKey("bro_path"));
+        }
         File file;
         Header header;
 
@@ -58,6 +62,7 @@ class Parser {
         foreach (d; log_files) {
             file = File(d.name, "r");
             header = parse_log_header(file);
+
             try {
                 if (header.path == "conn") {
                     summarize(new Conn(), header, file);
@@ -72,10 +77,10 @@ class Parser {
                 } else if (header.path == "x509") {
                     summarize(new X509(), header, file);
                 } else {
-                    this.log.warn("%s has not been implemented", header.path);
+                    warning("%s has not been implemented", header.path);
                 }
             } catch (Exception e) {
-                this.log.error("%s - %s", d.name, e.msg);
+                error("%s - %s", d.name, e.msg);
             }
         }
     }
@@ -147,8 +152,7 @@ class Parser {
                 continue;
             }
 
-            log.fatal("Invalid or unknown entry \"%s\" in %s header", line, file);
-            throw new Exception("Invalid or unknown entry in log header. Check log.");
+            fatal("Invalid or unknown entry \"%s\" in %s header", line, file);
         }
 
         // dmd complains without this here
@@ -165,17 +169,6 @@ class Parser {
             gen.popFront();
             i++;
         }
-
-        /* TODO Summarize records
-        import std.container.rbtree;
-        import std.typecons;
-
-        auto value = tuple([1, 3], "t");
-        auto rbt = redBlackTree(value);
-        rbt.insert(tuple([1, 3], "b"));
-        rbt.insert(tuple([1, 3], "b"));
-        rbt.insert(tuple([2, 2], "p"));
-        */
     }
 
     /**
@@ -209,8 +202,7 @@ class Parser {
         {
             switch (key) {
                 default:
-                    log.fatal("Invalid configuration key summarize_by[%s]", key);
-                    throw new Exception("Invalid configuration key. Check log.");
+                    fatal("Invalid configuration key summarize_by[%s]", key);
                 case "conn":
                     valid = validate_members(new Conn(), value);
                     break;
@@ -232,8 +224,7 @@ class Parser {
             }
 
             if (!valid) {
-                log.fatal("Invalid configuration value summarize_by[%s] = %s", key, value);
-                throw new Exception("Invalid configuration value. Check log");
+                fatal("Invalid configuration value summarize_by[%s] = %s", key, value);
             }
         }
     }
@@ -245,15 +236,13 @@ class Parser {
     private bool validate_members(P)(P parser, string value) {
         string[] aggregates = split(value, ":");
         if (aggregates.length > 2) {
-            this.log.fatal("Too many colons in configuration value %s", value);
-            throw new Exception("Invalid configuration value. Check log");
+            fatal("Too many colons in configuration value %s", value);
         }
 
         for (int i = 0; i < 2; i++) {
             foreach (string column_header; split(aggregates[i], ",")) {
                 if (!validate_record_member(parser, column_header)) {
-                    this.log.fatal("Invalid configuration value %s", column_header);
-                    throw new Exception("Invalid configuration value. Check log");
+                    fatal("Invalid configuration value %s", column_header);
                 }
             }
         }
@@ -339,13 +328,6 @@ version(unittest) {
         Parser.convHex("\\x20").should == " ";
     }
 
-    @("validate_record_member")
-    unittest {
-        auto parser = new Parser();
-        parser.validate_record_member(new Conn(), "ts").should == true;
-        parser.validate_record_member(new X509(), "resp_ip").should == false;
-    }
-
     @("validate_members")
     unittest {
         auto parser = new Parser();
@@ -356,5 +338,12 @@ version(unittest) {
 
         parser.validate_members(new Conn(), "ts:uid:resp_h").shouldThrow!Exception;
         parser.validate_members(new Conn(), "ts:resp_g").shouldThrow!Exception;
+    }
+
+    @("validate_record_member")
+    unittest {
+        auto parser = new Parser();
+        parser.validate_record_member(new Conn(), "ts").should == true;
+        parser.validate_record_member(new X509(), "resp_ip").should == false;
     }
 }
