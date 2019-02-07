@@ -203,6 +203,7 @@ class Parser {
             switch (key) {
                 default:
                     fatal("Invalid configuration key summarize_by[%s]", key);
+                    assert(0);
                 case "conn":
                     valid = validate_members(new Conn(), value);
                     break;
@@ -319,7 +320,7 @@ version(unittest) {
         File file = File("tests/headers/invalid_entry.log", "r");
         Parser.Header header;
         auto parser = new Parser();
-        parser.parse_log_header(file).shouldThrow!Exception;
+        parser.parse_log_header(file).shouldThrow!(object.Error);
     }
 
     @("convert_hex_to_string")
@@ -336,8 +337,8 @@ version(unittest) {
         parser.validate_members(new Conn(), "ts:resp_h,resp_p").should == true;
         parser.validate_members(new Conn(), "ts,resp_p:resp_h,uid").should == true;
 
-        parser.validate_members(new Conn(), "ts:uid:resp_h").shouldThrow!Exception;
-        parser.validate_members(new Conn(), "ts:resp_g").shouldThrow!Exception;
+        parser.validate_members(new Conn(), "ts:uid:resp_h").shouldThrow!(object.Error);
+        parser.validate_members(new Conn(), "ts:resp_g").shouldThrow!(object.Error);
     }
 
     @("validate_record_member")
