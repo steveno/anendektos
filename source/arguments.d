@@ -47,17 +47,6 @@ class Arguments {
                 }
             }
 
-            if (args[i] == "bro_path") {
-                if (i + 1 < args.length) {
-                    bro_path = args[i + 1];
-                    skip_next = true;
-                    continue;
-                } else {
-                    ret_msg = "bro_path must be passed with a path";
-                    break;
-                }
-            }
-
             stderr.writefln("Unknown command line argument %s", args[i]);
             print_help();
             break;
@@ -84,7 +73,6 @@ class Arguments {
 Usage: anendektos [--help] [--version] bro_path [bro_path] config_path [config_path]
 
 Positional arguments:
- bro_path       Path to bro logs to parse
  config_path    Path to configuration file
 
 Named arguments
@@ -109,25 +97,5 @@ version(unittest) {
     unittest {
         auto args = new Arguments();
         args.parse_arguments(["./test", "config_path"]).shouldThrow!Exception;
-    }
-
-    @("arguments_bro_path_no_config_path")
-    unittest {
-        auto args = new Arguments();
-        args.parse_arguments(["./test", "bro_path", "/home/user/bro"]).shouldThrow!Exception;
-    }
-
-    @("arguments_bro_path_no_path")
-    unittest {
-        auto args = new Arguments();
-        args.parse_arguments(["./test", "bro_path"]).shouldThrow!Exception;
-    }
-
-    @("arguments_bro_config_path")
-    unittest {
-        auto args = new Arguments();
-        args.parse_arguments(["./test", "bro_path", "/home/user/bro", "config_path", "/home/user/user.ini"]);
-        args.bro_path.should == "/home/user/bro";
-        args.config_path.should == "/home/user/user.ini";
     }
 }
