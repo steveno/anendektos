@@ -20,6 +20,10 @@ import parsers.ssl;
 import parsers.x509;
 
 
+/**
+ * The parser class reads in the logs files then shells
+ * out the actual parsing to the individual parsers.
+ */
 class Parser {
     private immutable string log_suffix = ".log";
     private config.Config options;
@@ -37,6 +41,9 @@ class Parser {
         string[] fields;
     };
 
+    /**
+     * Default constructor
+     */
     this() {
         this.options = config.Config.get();
     }
@@ -131,12 +138,12 @@ class Parser {
             }
 
             if (startsWith(line, "#open")) {
-                int year = to!int(split(split(line, header.seperator)[1], "-")[0]);
-                int month = to!int(split(split(line, header.seperator)[1], "-")[1]);
-                int day = to!int(split(split(line, header.seperator)[1], "-")[2]);
-                int hour = to!int(split(split(line, header.seperator)[1], "-")[3]);
-                int minute = to!int(split(split(line, header.seperator)[1], "-")[4]);
-                int second = to!int(split(split(line, header.seperator)[1], "-")[5]);
+                const int year = to!int(split(split(line, header.seperator)[1], "-")[0]);
+                const int month = to!int(split(split(line, header.seperator)[1], "-")[1]);
+                const int day = to!int(split(split(line, header.seperator)[1], "-")[2]);
+                const int hour = to!int(split(split(line, header.seperator)[1], "-")[3]);
+                const int minute = to!int(split(split(line, header.seperator)[1], "-")[4]);
+                const int second = to!int(split(split(line, header.seperator)[1], "-")[5]);
                 header.open = DateTime(year, month, day, hour, minute, second);
                 continue;
             }
@@ -157,6 +164,9 @@ class Parser {
         assert(0);
     }
 
+    /**
+     * Summarize each log file type
+     */
     public void summarize(P)(P parser_type, Header header, File file) {
         parser_type.Record[int] res;
         auto gen = parser_type.parse_file(header, file);
@@ -208,7 +218,9 @@ version(unittest) {
         header.unset_field.should == "-";
         header.path.should == "conn";
         header.open.toISOString().should == "20180715T163941";
-        header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes", "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
+        header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service",
+            "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes",
+            "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
     }
 
     @("conn_header_with_space_sep")
@@ -224,7 +236,9 @@ version(unittest) {
         header.unset_field.should == "-";
         header.path.should == "conn";
         header.open.toISOString().should == "20180724T131650";
-        header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes", "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
+        header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service",
+            "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes",
+            "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
     }
 
     @("conn_header_with_pipe")
@@ -240,7 +254,9 @@ version(unittest) {
         header.unset_field.should == "-";
         header.path.should == "conn";
         header.open.toISOString().should == "20180715T163941";
-        header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes", "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
+        header.fields.should == ["ts", "uid", "id.orig_h", "id.orig_p", "id.resp_h", "id.resp_p", "proto", "service",
+            "duration", "orig_bytes", "resp_bytes", "conn_state", "local_orig", "local_resp", "missed_bytes",
+            "history", "orig_pkts", "orig_ip_bytes", "resp_pkts", "resp_ip_bytes", "tunnel_parents"];
     }
 
     @("conn_header_invalid_entry")

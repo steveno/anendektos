@@ -16,6 +16,9 @@ import std.experimental.logger;
 import parser;
 
 
+/**
+ * Dns object to parse dns log files
+ */
 class Dns : Parser {
     /**
      * Struct to hold the information for a line in dns log file.

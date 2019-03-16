@@ -15,6 +15,9 @@ import std.experimental.logger;
 import parser;
 
 
+/**
+ * X509 object to parse x509 log files
+ */
 class X509 : Parser {
     /**
      * Struct to hold the information for a line in x509 log file.

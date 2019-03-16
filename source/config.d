@@ -10,8 +10,12 @@ import std.stdio;
 import dini;
 
 
+/**
+ * Configuration object to hold configuration values
+ */
 class Config
 {
+    /// Ini object to parse our config file with
     public Ini ini;
 
     private static bool instantiated_;
@@ -80,7 +84,7 @@ version(unittest) {
 
     @("config_create_fail")
     unittest {
-        auto config = new Config("/not/a/path").shouldThrow!Exception;
+        const auto config = new Config("/not/a/path").shouldThrow!Exception;
     }
 
     @("config_create_get_default_path")

@@ -15,6 +15,9 @@ import std.experimental.logger;
 import parser;
 
 
+/**
+ * Conn object to parse conn log files
+ */
 class Conn : Parser {
     /**
      * Struct to hold the information for a line in conn log file.

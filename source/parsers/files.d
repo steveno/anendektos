@@ -15,6 +15,9 @@ import std.experimental.logger;
 import parser;
 
 
+/**
+ * Files object to parse files log files
+ */
 class Files : Parser {
     /**
      * Struct to hold the information for a line in files log file.

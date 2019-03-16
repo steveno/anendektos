@@ -31,7 +31,7 @@ version(unittest) {
         }
 
         // Parse our configuration and try and parse our bro logs
-        config.Config options = config.Config.get(arg_parser.config_path);
+        const config.Config options = config.Config.get(arg_parser.config_path);
         auto log_parser = new parser.Parser();
         log_parser.parse_logs();
 

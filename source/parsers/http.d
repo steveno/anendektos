@@ -15,6 +15,9 @@ import std.experimental.logger;
 import parser;
 
 
+/**
+ * Http object to parse http log files
+ */
 class Http : Parser {
     /**
      * Struct to hold the information for a line in http log file.

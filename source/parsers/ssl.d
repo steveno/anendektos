@@ -15,6 +15,9 @@ import std.experimental.logger;
 import parser;
 
 
+/**
+ * Ssl object to parse ssl log files
+ */
 class Ssl : Parser {
     /**
      * Struct to hold the information for a line in ssl log file.

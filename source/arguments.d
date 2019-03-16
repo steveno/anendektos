@@ -7,8 +7,10 @@ module arguments;
 import std.stdio;
 
 
+/**
+ * Parse command line arguments
+ */
 class Arguments {
-    string bro_path = "";
     string config_path = "";
 
     /**
@@ -70,7 +72,7 @@ class Arguments {
      */
     private void print_help() {
         string help_text = "
-Usage: anendektos [--help] [--version] bro_path [bro_path] config_path [config_path]
+Usage: anendektos [--help] [--version] config_path [config_path]
 
 Positional arguments:
  config_path    Path to configuration file
