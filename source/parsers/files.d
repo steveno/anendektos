@@ -74,7 +74,7 @@ class Files : Parser {
                 try {
                     cur_record.ts = to!double(cur_line[0]);
                 } catch (Exception e) {
-                    error("Processing ts on line %d: %s", line_num, e.msg);
+                    errorf("Processing ts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -102,7 +102,7 @@ class Files : Parser {
                 try {
                     cur_record.depth = to!int(cur_line[6]);
                 } catch (Exception e) {
-                    error("Processing depth on line %d: %s", line_num, e.msg);
+                    errorf("Processing depth on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -117,7 +117,7 @@ class Files : Parser {
                 try {
                     cur_record.duration = to!double(cur_line[10]);
                 } catch (Exception e) {
-                    error("Processing duration on line %d: %s", line_num, e.msg);
+                    errorf("Processing duration on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -140,7 +140,7 @@ class Files : Parser {
                 try {
                     cur_record.seen_bytes = to!int(cur_line[13]);
                 } catch (Exception e) {
-                    error("Processing  on line %d: %s", line_num, e.msg);
+                    errorf("Processing on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -148,21 +148,21 @@ class Files : Parser {
                     if (cur_line[14] != header.unset_field)
                         cur_record.total_bytes = to!int(cur_line[14]);
                 } catch (Exception e) {
-                    error("Processing total_bytes on line %d: %s", line_num, e.msg);
+                    errorf("Processing total_bytes on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.missing_bytes = to!int(cur_line[15]);
                 } catch (Exception e) {
-                    error("Processing missing_bytes on line %d: %s", line_num, e.msg);
+                    errorf("Processing missing_bytes on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.overflow_bytes = to!int(cur_line[16]);
                 } catch (Exception e) {
-                    error("Processing overflow_bytes on line %d: %s", line_num, e.msg);
+                    errorf("Processing overflow_bytes on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -201,7 +201,7 @@ class Files : Parser {
                     if (cur_line[24] != header.unset_field)
                         cur_record.extracted_size = to!int(cur_line[24]);
                 } catch (Exception e) {
-                    error("Processing extracted_size on line %d: %s", line_num, e.msg);
+                    errorf("Processing extracted_size on line %d: %s", line_num, e.msg);
                     continue;
                 }
 

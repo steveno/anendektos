@@ -78,7 +78,7 @@ class Http : Parser {
                 try {
                     cur_record.ts = to!double(cur_line[0]);
                 } catch (Exception e) {
-                    error("Processing ts on line %d: %s", line_num, e.msg);
+                    errorf("Processing ts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -88,7 +88,7 @@ class Http : Parser {
                 try {
                     cur_record.orig_p = to!int(cur_line[3]);
                 } catch (Exception e) {
-                    error("Processing orig_p on line %d: %s", line_num, e.msg);
+                    errorf("Processing orig_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -97,14 +97,14 @@ class Http : Parser {
                 try {
                     cur_record.resp_p = to!int(cur_line[5]);
                 } catch (Exception e) {
-                    error("Processing resp_p on line %d: %s", line_num, e.msg);
+                    errorf("Processing resp_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.trans_depth = to!int(cur_line[6]);
                 } catch (Exception e) {
-                    error("Processing trans_depth on line %d: %s", line_num, e.msg);
+                    errorf("Processing trans_depth on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -121,21 +121,21 @@ class Http : Parser {
                 try {
                     cur_record.request_body_len = to!int(cur_line[13]);
                 } catch (Exception e) {
-                    error("Processing request_body_len on line %d: %s", line_num, e.msg);
+                    errorf("Processing request_body_len on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.response_body_len = to!int(cur_line[14]);
                 } catch (Exception e) {
-                    error("Processing response_body_len on line %d: %s", line_num, e.msg);
+                    errorf("Processing response_body_len on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.status_code = to!int(cur_line[15]);
                 } catch (Exception e) {
-                    error("Processing status_code on line %d: %s", line_num, e.msg);
+                    errorf("Processing status_code on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -145,7 +145,7 @@ class Http : Parser {
                     try {
                         cur_record.info_code = to!int(cur_line[17]);
                     } catch (Exception e) {
-                        error("Processing info_code on line %d: %s", line_num, e.msg);
+                        errorf("Processing info_code on line %d: %s", line_num, e.msg);
                         continue;
                     }
                 }

@@ -70,7 +70,7 @@ class Conn : Parser {
                 try {
                     cur_record.ts = to!double(cur_line[0]);
                 } catch (Exception e) {
-                    error("Processing ts on line %d: %s", line_num, e.msg);
+                    errorf("Processing ts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -80,7 +80,7 @@ class Conn : Parser {
                 try {
                     cur_record.orig_p = to!int(cur_line[3]);
                 } catch (Exception e) {
-                    error("Processing orig_p on line %d: %s", line_num, e.msg);
+                    errorf("Processing orig_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -89,7 +89,7 @@ class Conn : Parser {
                 try {
                     cur_record.resp_p = to!int(cur_line[5]);
                 } catch (Exception e) {
-                    error("Processing resp_p on line %d: %s", line_num, e.msg);
+                    errorf("Processing resp_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -98,25 +98,31 @@ class Conn : Parser {
                 if (cur_line[7] != header.unset_field)
                     cur_record.service = cur_line[7];
 
-                try {
-                    cur_record.duration = to!double(cur_line[8]);
-                } catch (Exception e) {
-                    error("Processing duration on line %d: %s", line_num, e.msg);
-                    continue;
+                if (cur_line[8] != header.unset_field) {
+                    try {
+                        cur_record.duration = to!double(cur_line[8]);
+                    } catch (Exception e) {
+                        errorf("Processing duration on line %d: %s", line_num, e.msg);
+                        continue;
+                    }
                 }
 
-                try {
-                    cur_record.orig_bytes = to!int(cur_line[9]);
-                } catch (Exception e) {
-                    error("Processing orig_bytes on line %d: %s", line_num, e.msg);
-                    continue;
+                if (cur_line[9] != header.unset_field) {
+                    try {
+                        cur_record.orig_bytes = to!int(cur_line[9]);
+                    } catch (Exception e) {
+                        errorf("Processing orig_bytes on line %d: %s", line_num, e.msg);
+                        continue;
+                    }
                 }
 
-                try {
-                    cur_record.resp_bytes = to!int(cur_line[10]);
-                } catch (Exception e) {
-                    error("Processing resp_bytes on line %d: %s", line_num, e.msg);
-                    continue;
+                if (cur_line[10] != header.unset_field) {
+                    try {
+                        cur_record.resp_bytes = to!int(cur_line[10]);
+                    } catch (Exception e) {
+                        errorf("Processing resp_bytes on line %d: %s", line_num, e.msg);
+                        continue;
+                    }
                 }
 
                 cur_record.conn_state = cur_line[11];
@@ -142,7 +148,7 @@ class Conn : Parser {
                 try {
                     cur_record.missed_bytes = to!int(cur_line[14]);
                 } catch (Exception e) {
-                    error("Processing missed_bytes on line %d: %s", line_num, e.msg);
+                    errorf("Processing missed_bytes on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -154,28 +160,28 @@ class Conn : Parser {
                 try {
                     cur_record.orig_pkts = to!int(cur_line[16]);
                 } catch (Exception e) {
-                    error("Processing orig_pkts on line %d: %s", line_num, e.msg);
+                    errorf("Processing orig_pkts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.orig_ip_bytes = to!int(cur_line[17]);
                 } catch (Exception e) {
-                    error("Processing orig_ip_bytes on line %d: %s", line_num, e.msg);
+                    errorf("Processing orig_ip_bytes on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.resp_pkts = to!int(cur_line[18]);
                 } catch (Exception e) {
-                    error("Processing resp_pkts on line %d: %s", line_num, e.msg);
+                    errorf("Processing resp_pkts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
                 try {
                     cur_record.resp_ip_bytes = to!int(cur_line[19]);
                 } catch (Exception e) {
-                    error("Processing resp_ip_bytes on line %d: %s", line_num, e.msg);
+                    errorf("Processing resp_ip_bytes on line %d: %s", line_num, e.msg);
                     continue;
                 }
 

@@ -69,7 +69,7 @@ class Ssl : Parser {
                 try {
                     cur_record.ts = to!double(cur_line[0]);
                 } catch (Exception e) {
-                    error("Processing ts on line %d: %s", line_num, e.msg);
+                    errorf("Processing ts on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -79,7 +79,7 @@ class Ssl : Parser {
                 try {
                     cur_record.orig_p = to!int(cur_line[3]);
                 } catch (Exception e) {
-                    error("Processing orig_p on line %d: %s", line_num, e.msg);
+                    errorf("Processing orig_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
@@ -88,7 +88,7 @@ class Ssl : Parser {
                 try {
                     cur_record.resp_p = to!int(cur_line[5]);
                 } catch (Exception e) {
-                    error("Processing resp_p on line %d: %s", line_num, e.msg);
+                    errorf("Processing resp_p on line %d: %s", line_num, e.msg);
                     continue;
                 }
 
