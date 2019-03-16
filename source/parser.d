@@ -52,12 +52,10 @@ class Parser {
         try {
             log_files = dirEntries(this.options.ini["application"].getKey("bro_path"), SpanMode.shallow);
         } catch (Exception e) {
-            fatal("bro_path %s does not exist", this.options.ini["application"].getKey("bro_path"));
+            fatalf("bro_path %s does not exist", this.options.ini["application"].getKey("bro_path"));
         }
         File file;
         Header header;
-
-        validate_summarize_config();
 
         foreach (d; log_files) {
             file = File(d.name, "r");
@@ -77,10 +75,10 @@ class Parser {
                 } else if (header.path == "x509") {
                     summarize(new X509(), header, file);
                 } else {
-                    warning("%s has not been implemented", header.path);
+                    warningf("%s has not been implemented", header.path);
                 }
             } catch (Exception e) {
-                error("%s - %s", d.name, e.msg);
+                errorf("%s - %s", d.name, e.msg);
             }
         }
     }
@@ -191,76 +189,6 @@ class Parser {
 
         return to!string(cast(char)to!int(result, 16));
     }
-
-    /**
-     * Validate the contents of the summarize_by section of the configuration file.
-     */
-    private void validate_summarize_config() {
-        bool valid;
-
-        foreach(key, value; this.options.ini["summarize_by"].keys)
-        {
-            switch (key) {
-                default:
-                    fatal("Invalid configuration key summarize_by[%s]", key);
-                    assert(0);
-                case "conn":
-                    valid = validate_members(new Conn(), value);
-                    break;
-                case "dns":
-                    valid = validate_members(new Dns(), value);
-                    break;
-                case "files":
-                    valid = validate_members(new Files(), value);
-                    break;
-                case "http":
-                    valid = validate_members(new Http(), value);
-                    break;
-                case "ssl":
-                    valid = validate_members(new Ssl(), value);
-                    break;
-                case "x509":
-                    valid = validate_members(new X509(), value);
-                    break;
-            }
-
-            if (!valid) {
-                fatal("Invalid configuration value summarize_by[%s] = %s", key, value);
-            }
-        }
-    }
-
-    /**
-     * Validate all of the members listed in each line of the summarize_by section
-     * of the configuration file.
-     */
-    private bool validate_members(P)(P parser, string value) {
-        string[] aggregates = split(value, ":");
-        if (aggregates.length > 2) {
-            fatal("Too many colons in configuration value %s", value);
-        }
-
-        for (int i = 0; i < 2; i++) {
-            foreach (string column_header; split(aggregates[i], ",")) {
-                if (!validate_record_member(parser, column_header)) {
-                    fatal("Invalid configuration value %s", column_header);
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate a specific member is in the Record for a given parser.
-     */
-    private bool validate_record_member(P)(P parser, string value) {
-        foreach(member; __traits(allMembers, parser.Record))
-            if (member == value)
-                return true;
-
-        return false;
-    }
 }
 
 
@@ -327,24 +255,5 @@ version(unittest) {
     @safe pure unittest {
         Parser.convHex("\\x09").should == "\t";
         Parser.convHex("\\x20").should == " ";
-    }
-
-    @("validate_members")
-    unittest {
-        auto parser = new Parser();
-        parser.validate_members(new Conn(), "ts:resp_h").should == true;
-        parser.validate_members(new Conn(), "ts,resp_p:resp_h").should == true;
-        parser.validate_members(new Conn(), "ts:resp_h,resp_p").should == true;
-        parser.validate_members(new Conn(), "ts,resp_p:resp_h,uid").should == true;
-
-        parser.validate_members(new Conn(), "ts:uid:resp_h").shouldThrow!(object.Error);
-        parser.validate_members(new Conn(), "ts:resp_g").shouldThrow!(object.Error);
-    }
-
-    @("validate_record_member")
-    unittest {
-        auto parser = new Parser();
-        parser.validate_record_member(new Conn(), "ts").should == true;
-        parser.validate_record_member(new X509(), "resp_ip").should == false;
     }
 }

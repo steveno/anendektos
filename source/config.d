@@ -75,7 +75,7 @@ version(unittest) {
     @("config_create")
     unittest {
         auto config = new Config("anendektos.ini");
-        config.ini["application"].getKey("log_file").should == "../anendektos.log";
+        config.ini["application"].getKey("log_level").should == "warn";
     }
 
     @("config_create_fail")

@@ -32,7 +32,7 @@ version(unittest) {
 
         // Parse our configuration and try and parse our bro logs
         config.Config options = config.Config.get(arg_parser.config_path);
-        parser.Parser log_parser = new parser.Parser();
+        auto log_parser = new parser.Parser();
         log_parser.parse_logs();
 
         return 0;
