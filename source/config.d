@@ -75,7 +75,7 @@ version(unittest) {
     @("config_create")
     unittest {
         auto config = new Config("anendektos.ini");
-        config.ini["application"].getKey("log_level").should == "warn";
+        config.ini["application"].getKey("log_level").should == "Warn";
     }
 
     @("config_create_fail")
@@ -86,12 +86,12 @@ version(unittest) {
     @("config_create_get_default_path")
     unittest {
         auto config = Config.get();
-        config.ini["application"].getKey("log_file").should == "../anendektos.log";
+        config.ini["application"].getKey("log_level").should == "Warn";
     }
 
     @("config_create_get_with_path")
     unittest {
         auto config = Config.get("anendektos.ini");
-        config.ini["application"].getKey("log_file").should == "../anendektos.log";
+        config.ini["application"].getKey("log_level").should == "Warn";
     }
 }
