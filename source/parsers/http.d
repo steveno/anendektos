@@ -290,8 +290,8 @@ version(unittest) {
         results[entry].response_body_len.should == 463;
         results[entry].status_code.should == 200;
         results[entry].status_msg.should == "OK";
-        assert(results[entry].info_code.isNull);
-        assert(results[entry].info_msg.isNull);
+        results[entry].info_code.should == 104;
+        results[entry].info_msg.should == "informative message";
         results[entry].tags.shouldBeEmpty;
         assert(results[entry].username.isNull);
         assert(results[entry].password.isNull);
@@ -335,8 +335,8 @@ version(unittest) {
         assert(results[entry].info_code.isNull);
         assert(results[entry].info_msg.isNull);
         results[entry].tags.shouldBeEmpty;
-        assert(results[entry].username.isNull);
-        assert(results[entry].password.isNull);
+        results[entry].username.should == "test_user";
+        results[entry].password.should == "password";
         results[entry].proxied.shouldBeEmpty();
         results[entry].orig_fuids.should == ["F4MT931ov6qLvRD8Ne"];
         results[entry].orig_filenames.shouldBeEmpty();
